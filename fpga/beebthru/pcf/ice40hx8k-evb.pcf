@@ -1,0 +1,199 @@
+# VP415-Emulator FPGA
+# Based on the Olimex iCE40HX8K-EVB board
+
+## 100MHz System clock
+set_io -nowarn clock100Mhz J3
+
+## Buttons
+set_io -nowarn buttons[0] K11
+set_io -nowarn buttons[1] P13
+
+## LEDs
+set_io -nowarn leds[0] M12
+set_io -nowarn leds[1] R16
+
+## On-board SRAM
+set_io -nowarn SRAM0_nCS T6
+set_io -nowarn SRAM0_nOE L9
+set_io -nowarn SRAM0_nWE T7
+set_io -nowarn SRAM0_A[0] N6
+set_io -nowarn SRAM0_A[1] T1
+set_io -nowarn SRAM0_A[2] P4
+set_io -nowarn SRAM0_A[3] R2
+set_io -nowarn SRAM0_A[4] N5
+set_io -nowarn SRAM0_A[5] T2
+set_io -nowarn SRAM0_A[6] P5
+set_io -nowarn SRAM0_A[7] R3
+set_io -nowarn SRAM0_A[8] R5
+set_io -nowarn SRAM0_A[9] T3
+set_io -nowarn SRAM0_A[10] R4
+set_io -nowarn SRAM0_A[11] M7
+set_io -nowarn SRAM0_A[12] N7
+set_io -nowarn SRAM0_A[13] P6
+set_io -nowarn SRAM0_A[14] M8
+set_io -nowarn SRAM0_A[15] T5
+set_io -nowarn SRAM0_A[16] R6
+set_io -nowarn SRAM0_A[17] P8
+set_io -nowarn SRAM0_D[0] T8
+set_io -nowarn SRAM0_D[1] P7
+set_io -nowarn SRAM0_D[2] N9
+set_io -nowarn SRAM0_D[3] T9
+set_io -nowarn SRAM0_D[4] M9
+set_io -nowarn SRAM0_D[5] R9
+set_io -nowarn SRAM0_D[6] K9
+set_io -nowarn SRAM0_D[7] P9
+set_io -nowarn SRAM0_D[8] R10
+set_io -nowarn SRAM0_D[9] L10
+set_io -nowarn SRAM0_D[10] P10
+set_io -nowarn SRAM0_D[11] N10
+set_io -nowarn SRAM0_D[12] T10
+set_io -nowarn SRAM0_D[13] T11
+set_io -nowarn SRAM0_D[14] T15
+set_io -nowarn SRAM0_D[15] T14
+
+## GPIO1 (34 pin right-angle IDC)
+## SCART RGB666 Dev Adaptor with RGB 3-bit input
+set_io -nowarn red_scartOut[0] E4
+set_io -nowarn red_scartOut[1] B2
+set_io -nowarn red_scartOut[2] F5
+set_io -nowarn red_scartOut[3] B1
+set_io -nowarn red_scartOut[4] C1
+set_io -nowarn red_scartOut[5] C2
+
+set_io -nowarn green_scartOut[0] F4
+set_io -nowarn green_scartOut[1] D2
+set_io -nowarn green_scartOut[2] G5
+set_io -nowarn green_scartOut[3] D1
+set_io -nowarn green_scartOut[4] G4
+set_io -nowarn green_scartOut[5] E3
+
+set_io -nowarn blue_scartOut[0] J2
+set_io -nowarn blue_scartOut[1] H1
+set_io -nowarn blue_scartOut[2] G1
+set_io -nowarn blue_scartOut[3] J5
+set_io -nowarn blue_scartOut[4] H2
+set_io -nowarn blue_scartOut[5] J4
+
+set_io -nowarn cSyncScart H5
+
+set_io -nowarn aivRedIn H6
+set_io -nowarn aivGreenIn F2
+set_io -nowarn aivBlueIn H3
+set_io -nowarn aivCSyncIn F3
+
+set_io -nowarn gpio1_22 G2
+set_io -nowarn gpio1_24 H4
+set_io -nowarn gpio1_26 F1
+set_io -nowarn gpio1_31 E2
+set_io -nowarn gpio1_33 G3
+
+## EXT1 External 16M SRAM board (1)
+# set_io -nowarn SRAMa_D[15] C14
+# set_io -nowarn SRAMa_D[14] B15
+# set_io -nowarn SRAMa_D[0] B7
+# set_io -nowarn SRAMa_D[13] D13
+# set_io -nowarn SRAMa_D[1] C7
+# set_io -nowarn SRAMa_D[12] B14
+# set_io -nowarn SRAMa_D[2] A7
+# set_io -nowarn SRAMa_D[11] C12
+# set_io -nowarn SRAMa_D[3] B8
+# set_io -nowarn SRAMa_D[10] E11
+# set_io -nowarn SRAMa_D[4] D8
+# set_io -nowarn SRAMa_D[9] C13
+# set_io -nowarn SRAMa_D[5] B9
+# set_io -nowarn SRAMa_D[8] A16
+# set_io -nowarn SRAMa_D[6] F7
+# set_io -nowarn SRAMa_LDQM A15
+# set_io -nowarn SRAMa_D[7] C8
+# set_io -nowarn SRAMa_nWE B13
+# set_io -nowarn SRAMa_nRAS F9
+# set_io -nowarn SRAMa_nCAS E10
+# set_io -nowarn SRAMa_CKE A9
+# set_io -nowarn SRAM_A[9] C11
+# set_io -nowarn SRAM_A[11] D9
+# set_io -nowarn SRAM_A[8] D11
+# set_io -nowarn SRAM_A[10] E9
+# set_io -nowarn SRAM_A[7] B12
+# set_io -nowarn SRAM_A[0] C9
+# set_io -nowarn SRAM_A[6] B10
+# set_io -nowarn SRAM_A[1] D10
+# set_io -nowarn SRAM_A[5] B11
+# set_io -nowarn SRAM_A[2] A11
+# set_io -nowarn SRAM_A[4] C10
+# set_io -nowarn SRAM_A[3] A10
+
+## EXT2 External 16M SRAM board (2)
+# set_io -nowarn SRAMb_D[15] B6
+# set_io -nowarn SRAMb_D[14] C6
+# set_io -nowarn SRAMb_D[0] J10
+# set_io -nowarn SRAMb_D[13] D7
+# set_io -nowarn SRAMb_D[1] M16
+# set_io -nowarn SRAMb_D[12] A6
+# set_io -nowarn SRAMb_D[2] K12
+# set_io -nowarn SRAMb_D[11] D6
+# set_io -nowarn SRAMb_D[3] L14
+# set_io -nowarn SRAMb_D[10] A5
+# set_io -nowarn SRAMb_D[4] L13
+# set_io -nowarn SRAMb_D[9] B5
+# set_io -nowarn SRAMb_D[5] N16
+# set_io -nowarn SRAMb_D[8] E6
+# set_io -nowarn SRAMb_D[6] L12
+# set_io -nowarn SRAMb_D[7] M14
+# set_io -nowarn SRAMb_LDQM M13
+# set_io -nowarn SRAM_CLK D5
+# set_io -nowarn SRAMa_nCS P16
+# set_io -nowarn SRAMa_UDQM A1
+# set_io -nowarn SRAMb_UDQM P15
+# set_io -nowarn SRAMb_nWE C5
+# set_io -nowarn SRAMb_nRAS P14
+# set_io -nowarn SRAMb_nCAS C4
+# set_io -nowarn SRAMb_nCS R15
+# set_io -nowarn SRAMb_CKE B3
+
+## EXT3 40-pin header to Raspberry Pi GPIO header
+set_io -nowarn pi_gpio[2]  M15
+set_io -nowarn pi_gpio[3]  J11
+set_io -nowarn pi_gpio[4]  E14
+set_io -nowarn pi_gpio[14] L16
+set_io -nowarn pi_gpio[15] F11
+set_io -nowarn pi_gpio[17] K13
+set_io -nowarn pi_gpio[18] D15
+set_io -nowarn pi_gpio[27] K14
+set_io -nowarn pi_gpio[22] F12
+set_io -nowarn pi_gpio[23] J15
+set_io -nowarn pi_gpio[24] F14
+set_io -nowarn pi_gpio[10] K15
+set_io -nowarn pi_gpio[9]  G12
+set_io -nowarn pi_gpio[25] K16
+set_io -nowarn pi_gpio[11] D16
+set_io -nowarn pi_gpio[8]  J14
+set_io -nowarn pi_gpio[7]  G13
+set_io -nowarn pi_gpio[0]  J12
+set_io -nowarn pi_gpio[1]  E16
+set_io -nowarn pi_gpio[5]  J13
+set_io -nowarn pi_gpio[6]  G14
+set_io -nowarn pi_gpio[12] J16
+set_io -nowarn pi_gpio[13] F15
+set_io -nowarn pi_gpio[19] H13
+set_io -nowarn pi_gpio[16] G11
+set_io -nowarn pi_gpio[26] H11
+set_io -nowarn pi_gpio[20] F16
+set_io -nowarn pi_gpio[21] H16
+
+## EXT4 - PicoScope 16-bit Data analysis connector
+set_io -nowarn picoScope[0] N4
+set_io -nowarn picoScope[1] M5
+set_io -nowarn picoScope[2] P2
+set_io -nowarn picoScope[3] P1
+set_io -nowarn picoScope[4] N3
+set_io -nowarn picoScope[5] R1
+set_io -nowarn picoScope[6] M4
+set_io -nowarn picoScope[7] L5
+set_io -nowarn picoScope[8] M3
+set_io -nowarn picoScope[9] N2
+set_io -nowarn picoScope[10] L7
+set_io -nowarn picoScope[11] K5
+set_io -nowarn picoScope[12] L3
+set_io -nowarn picoScope[13] M6
+set_io -nowarn picoScope[14] M2
+set_io -nowarn picoScope[15] L6

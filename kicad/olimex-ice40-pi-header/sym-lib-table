@@ -1,0 +1,4 @@
+(sym_lib_table
+  (version 7)
+  (lib (name "iCE40HX8K-EVB")(type "KiCad")(uri "${KIPRJMOD}/iCE40HX8K-EVB.kicad_sym")(options "")(descr ""))
+)

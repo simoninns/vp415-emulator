@@ -1,0 +1,8 @@
+# ICE40 FPGA gitignore
+.idea*
+*.asc
+*.bin
+*.blif
+*.json
+*.log
+*.rpt

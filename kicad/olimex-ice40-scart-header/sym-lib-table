@@ -1,0 +1,9 @@
+(sym_lib_table
+  (version 7)
+  (lib (name "SCART")(type "KiCad")(uri "${KIPRJMOD}/SCART.kicad_sym")(options "")(descr ""))
+  (lib (name "iCE40HX8K-EVB")(type "KiCad")(uri "${KIPRJMOD}/iCE40HX8K-EVB.kicad_sym")(options "")(descr ""))
+  (lib (name "MAX662A")(type "KiCad")(uri "${KIPRJMOD}/MAX662A.kicad_sym")(options "")(descr ""))
+  (lib (name "RS_DIN_Socket")(type "KiCad")(uri "${KIPRJMOD}/RS_DIN_Socket.kicad_sym")(options "")(descr ""))
+  (lib (name "lmh1981")(type "KiCad")(uri "${KIPRJMOD}/lmh1981.kicad_sym")(options "")(descr ""))
+  (lib (name "nc7wz16")(type "KiCad")(uri "${KIPRJMOD}/nc7wz16.kicad_sym")(options "")(descr ""))
+)
