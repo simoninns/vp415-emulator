@@ -1,0 +1,3 @@
+[submodule "ki-lime-pi"]
+	path = kicad/libraries/ki-lime-pi
+	url = https://github.com/recursivenomad/ki-lime-pi-to-go.git
