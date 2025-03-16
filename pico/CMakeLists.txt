@@ -1,6 +1,8 @@
 cmake_minimum_required(VERSION 3.12)
 
-# Pull in SDK (must be before project)
+# Set the board type and pull in the Pico SDK
+set(PICO_PLATFORM rp2350)
+set(PICO_BOARD pico2)
 include(pico_sdk_import.cmake)
 
 project(pico C CXX ASM)
