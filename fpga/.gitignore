@@ -6,3 +6,5 @@
 *.json
 *.log
 *.rpt
+
+build/
