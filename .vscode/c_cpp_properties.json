@@ -1,0 +1,27 @@
+{
+    "configurations": [
+        {
+            "name": "Linux",
+            "includePath": [
+                "${workspaceFolder}/**",
+                "${env:PICO_SDK_PATH}/**",
+                "${env:PICO_SDK_PATH}/src/common/pico_stdlib/include",
+                "${env:PICO_SDK_PATH}/src/rp2_common/hardware_gpio/include",
+                "${env:PICO_SDK_PATH}/src/common/pico_base/include",
+                "${env:PICO_SDK_PATH}/src/boards/include",
+                "${env:PICO_SDK_PATH}/src/rp2_common/pico_platform/include",
+                "${env:PICO_SDK_PATH}/src/rp2040/hardware_regs/include",
+                "${env:PICO_SDK_PATH}/src/rp2_common/hardware_base/include",
+                "${env:PICO_SDK_PATH}/src/rp2040/hardware_structs/include",
+                "${env:PICO_SDK_PATH}/src/rp2_common/hardware_irq/include",
+                "${env:PICO_SDK_PATH}/src/rp2_common/hardware_resets/include"
+            ],
+            "defines": [],
+            "compilerPath": "/usr/bin/clang-19",
+            "cStandard": "c17",
+            "cppStandard": "c++17",
+            "intelliSenseMode": "linux-clang-x64"
+        }
+    ],
+    "version": 4
+}

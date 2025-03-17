@@ -1,5 +1,7 @@
 add_executable(sasi2usb
         src/main.c
+        src/usb.c
+        src/usb_eps.c
 )
 
 # pull in common dependencies

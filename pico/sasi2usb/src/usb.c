@@ -1,6 +1,6 @@
 /************************************************************************
 
-    main.c
+    usb.c
 
     Raspberry Pico SASI2USB adapter
     VP415-Emulator
@@ -25,34 +25,22 @@
 
 ************************************************************************/
 
- #include <stdio.h>
- #include "pico/stdlib.h"
- 
- #include "usb.h"
+#include <stdio.h>
+#include "pico/stdlib.h"
 
- #define LED_DELAY_MS 100
- #define PICO_DEFAULT_LED_PIN 25
- 
- // Initialize the GPIO for the LED
- void pico_led_init(void) {
-    gpio_init(PICO_DEFAULT_LED_PIN);
-    gpio_set_dir(PICO_DEFAULT_LED_PIN, GPIO_OUT);
- }
- 
- // Turn the LED on or off
- void pico_set_led(bool led_on) {
-     // Just set the GPIO on or off
-     gpio_put(PICO_DEFAULT_LED_PIN, led_on);
- }
- 
- int main() {
-    pico_led_init();
-    stdio_init_all();
-    initialise_usb();
-    while (true) {
-        pico_set_led(true);
-        sleep_ms(LED_DELAY_MS);
-        pico_set_led(false);
-        sleep_ms(LED_DELAY_MS);
+#include "usb.h"
+#include "usb_eps.h"
+
+void initialise_usb(void) {
+    usb_device_init();
+
+    // Wait until configured
+    printf("Waiting for USB device configuration...\n");
+    while (!isConfigured()) {
+        sleep_ms(100);
     }
- }
+    printf("USB device configured\n");
+
+    // Get ready to rx from host
+    usb_start_transfer(usb_get_endpoint_configuration(EP1_OUT_ADDR), NULL, 64);
+}
