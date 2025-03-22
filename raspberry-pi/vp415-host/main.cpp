@@ -26,12 +26,51 @@
 ************************************************************************/
 
 #include <QApplication>
+#include <QDebug>
+#include <QtGlobal>
+#include <QCommandLineParser>
 
 #include "mainwindow.h"
 
 int main(int argc, char *argv[]) {
-    QApplication a(argc, argv);
-    MainWindow w;
-    w.show();
-    return a.exec();
+    QApplication app(argc, argv);
+
+    // Set application name and version
+    QCoreApplication::setApplicationName("vp415-host");
+    QCoreApplication::setApplicationVersion(
+            QString("Branch: %1 / Commit: %2").arg(APP_BRANCH, APP_COMMIT));
+    QCoreApplication::setOrganizationDomain("domesday86.com");
+
+    // Set up the command line parser
+    QCommandLineParser parser;
+    parser.setApplicationDescription(
+            "efm-decoder-f2 - EFM T-values to F2 Section decoder\n"
+            "\n"
+            "(c)2025 Simon Inns\n"
+            "GPLv3 Open-Source - github: https://github.com/simoninns/efm-tools");
+    parser.addHelpOption();
+    parser.addVersionOption();
+
+    // -- Positional arguments --
+    parser.addPositionalArgument("serialport",
+        QCoreApplication::translate("main", "Specify serial port device to use"));
+    
+    // Process the command line options and arguments given by the user
+    parser.process(app);
+
+    // Get the filename arguments from the parser
+    QString serialDeviceName;
+    QStringList positionalArguments = parser.positionalArguments();
+
+    if (positionalArguments.count() != 1) {
+        qWarning() << "You must specify the serial device name";
+        return 1;
+    }
+    serialDeviceName = positionalArguments.at(0);
+
+    // Get on with the main window
+    MainWindow mainWindow(nullptr, serialDeviceName);
+    mainWindow.show();
+
+    return app.exec();
 }

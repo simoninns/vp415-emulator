@@ -30,20 +30,24 @@
 
 // https://doc.qt.io/vscodeext/vscodeext-tutorials-qt-widgets.html
 
-MainWindow::MainWindow(QWidget *parent)
+MainWindow::MainWindow(QWidget *parent, QString serialDeviceName)
     : QMainWindow(parent), ui(new Ui::MainWindow) {
     ui->setupUi(this);
 
     // Add a status bar
     statusBar = new QStatusBar();
     setStatusBar(statusBar);
-    usb_device_detached();
 
-    // Handle the USB device
-    usbDevice.initialize(0x1D50, 0x7504);
-    //connect(&usbDevice, &UsbDevice::deviceConnected, this, &MainWindow::usb_device_attached);
-    //connect(&usbDevice, &UsbDevice::deviceDisconnected, this, &MainWindow::usb_device_detached);
-    usbDevice.startPolling(500);
+    // Connect the PicoComs dataReceived signal to the MainWindow slot
+    connect(&m_picoComs, &PicoComs::dataReceived, this, [this](const QByteArray &data) {
+        qDebug() << "MainWindow::dataReceived() - Data received: " << data;
+    });
+
+    // Open the serial port
+    if (!m_picoComs.openSerialPort(serialDeviceName)) {
+        qDebug() << "MainWindow::MainWindow() - Failed to open serial port: " << serialDeviceName;
+        exit(EXIT_FAILURE);
+    }
 }
 
 MainWindow::~MainWindow() { delete ui; }
@@ -52,16 +56,6 @@ void MainWindow::on_pushButton_clicked() {
     qDebug() << "MainWindow::on_pushButton_clicked() - Button clicked";
 }
 
-void MainWindow::usb_device_attached(uint16_t vid, uint16_t pid) {
-    qDebug() << "MainWindow::usb_device_attached() - USB device attached: VID="
-             << QString("0x%1").arg(vid, 4, 16, QChar('0'))
-             << " PID=" << QString("0x%1").arg(pid, 4, 16, QChar('0'));
-    statusBar->showMessage(
-        "USB device ready: VID=" + QString("0x%1").arg(vid, 4, 16, QChar('0')) +
-        " PID=" + QString("0x%1").arg(pid, 4, 16, QChar('0')));
-}
-
-void MainWindow::usb_device_detached() {
-    qDebug() << "MainWindow::usb_device_detached() - USB device detached";
-    statusBar->showMessage("No USB device attached");
+void MainWindow::dataReceived(const QByteArray &data) {
+    qDebug() << "MainWindow::dataReceived() - Data received: " << data;
 }

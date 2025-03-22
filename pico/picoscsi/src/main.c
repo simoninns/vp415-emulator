@@ -35,16 +35,19 @@
 #include "hostadapter.h"
 #include "scsi.h"
 #include "statusled.h"
+#include "picom.h"
 
 int main(void) {
-    // Initialise the UART serial transceiver
-    stdio_init_all();
+    // Initilalise the debug output
+    debugInitialise();
 
     // Initialise the host adapter interface
-    debugPrintf("Initialising PicoSCSI host adapter...\r\n");
     hostadapterInitialise();
 
-    // Initialise the SD Card and FAT file system functions
+    // Initialise the Pi 5 communication interface
+    picomInitialise();
+
+    // Initialise the filesystem functions
     filesystemInitialise();
 
     // Initialise the status LED

@@ -39,13 +39,14 @@ volatile bool debugFlag_scsiBlocks = false;
 volatile bool debugFlag_scsiFcodes = true;
 volatile bool debugFlag_scsiState = true;
 
+void debugInitialise(void) {
+    stdio_init_all();
+}
+
 void debugPrintf(const char *format, ...) {
     va_list args;
     va_start(args, format);
-
-    printf("Debug: ");
     vprintf(format, args);
-
     va_end(args);
 }
 

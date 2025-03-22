@@ -25,8 +25,6 @@
 ************************************************************************/
 
 // Global includes
-#include "filesystem.h"
-
 #include <pico/stdlib.h>
 #include <stdbool.h>
 #include <stdint.h>
@@ -34,6 +32,8 @@
 #include <string.h>
 
 #include "debug.h"
+#include "picom.h"
+#include "filesystem.h"
 
 // File system state structure
 struct filesystemStateStruct {
@@ -76,8 +76,7 @@ static void filesystemFlush(void) {
     }
 }
 
-// Function to initialise the file system control functions (called on a
-// cold-start of the AVR)
+// Function to initialise the file system control functions
 void filesystemInitialise(void) {
     if (debugFlag_filesystem)
         debugPrintf(
@@ -146,7 +145,9 @@ bool filesystemMount(void) {
         debugPrintf("File system: filesystemMount(): Mounting file system\r\n");
 
     // Is the file system already mounted?
-    if (filesystemState.fsMountState == true) {
+    uint8_t pirResponse = picomGetMountState();
+
+    if (pirResponse == PIR_TRUE) {
         if (debugFlag_filesystem)
             debugPrintf(
                 "File system: filesystemMount(): ERROR: File system is already "
@@ -169,35 +170,23 @@ bool filesystemMount(void) {
     filesystemSetLunStatus(6, false);
     filesystemSetLunStatus(7, false);
 
-    // Mount the SD card
-    filesystemState.fsResult = 4;  // f_mount(&filesystemState.fsObject, "", 1);
+    // Mount the host filesystem
+    pirResponse = picomSetMountState(true);
 
     // Check the result
-    if (filesystemState.fsResult != 0) {
+    if (pirResponse != PIR_TRUE) {
         if (debugFlag_filesystem) {
-            switch (filesystemState.fsResult) {
-                case 1:
+            switch (pirResponse) {
+                case PIR_FALSE:
                     debugPrintf(
                         "File system: filesystemMount(): ERROR: "
-                        "FR_INVALID_DRIVE\r\n");
+                        "Pi could not mount filesystem\r\n");
                     break;
 
-                case 2:
+                case PIR_TIMEOUT:
                     debugPrintf(
                         "File system: filesystemMount(): ERROR: "
-                        "FR_DISK_ERR\r\n");
-                    break;
-
-                case 3:
-                    debugPrintf(
-                        "File system: filesystemMount(): ERROR: FR_NOT_READY - "
-                        "File system not ready - missing SD Card?\r\n");
-                    break;
-
-                case 4:
-                    debugPrintf(
-                        "File system: filesystemMount(): ERROR: "
-                        "FR_NO_FILESYSTEM - SD Card not formatted?\r\n");
+                        "Pi did not respond (timeout)\r\n");
                     break;
 
                 default:

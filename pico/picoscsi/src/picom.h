@@ -1,6 +1,6 @@
 /************************************************************************
 
-    debug.h
+    picom.h
 
     PicoSCSI - Raspberry Pico SCSI-1 Drive Emulator
     Copyright (C) 2025 Simon Inns
@@ -24,21 +24,28 @@
 
 ************************************************************************/
 
-#ifndef DEBUG_H_
-#define DEBUG_H_
+#ifndef PICOM_H_
+#define PICOM_H_
 
-// External globals
-extern volatile bool debugFlag_filesystem;
-extern volatile bool debugFlag_scsiCommands;
-extern volatile bool debugFlag_scsiBlocks;
-extern volatile bool debugFlag_scsiFcodes;
-extern volatile bool debugFlag_scsiState;
+// Command responses
+#define PIR_OK 0x00
+#define PIR_TRUE 0x01
+#define PIR_FALSE 0x02
+#define PIR_ERROR 0x03
+#define PIR_TIMEOUT 0x04
+
+// Command codes
+#define PIC_RESET 0x00
+#define PIC_SET_MOUNT_STATE 0x01
+#define PIC_GET_MOUNT_STATE 0x02
+#define PIC_SET_LUN_STATE 0x03
+#define PIC_GET_LUN_STATE 0x04
 
 // Function prototypes
-void debugInitialise(void);
-void debugPrintf(const char *format, ...);
+void picomInitialise(void);
 
-void debugSectorBufferHex(uint8_t *buffer, uint16_t numberOfBytes);
-void debugLunDescriptor(uint8_t *buffer);
+// Commands
+uint8_t picomGetMountState(void);
+uint8_t picomSetMountState(bool mountState);
 
-#endif /* DEBUG_H_ */
+#endif /* PICOM_H_ */

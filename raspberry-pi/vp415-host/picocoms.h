@@ -1,6 +1,6 @@
 /************************************************************************
 
-    mainwindow.h
+    picocoms.h
 
     VP415-host - A host application for the VP415 Emulator
     VP415-Emulator
@@ -25,36 +25,34 @@
 
 ************************************************************************/
 
-#ifndef MAINWINDOW_H
-#define MAINWINDOW_H
+#ifndef PICOCOMS_H
+#define PICOCOMS_H
 
-#include <QDebug>
-#include <QMainWindow>
+#include <QObject>
+#include <QString>
+#include <QSerialPort>
 
-#include "picocoms.h"
-
-QT_BEGIN_NAMESPACE
-namespace Ui {
-class MainWindow;
-}
-QT_END_NAMESPACE
-
-class MainWindow : public QMainWindow {
+class PicoComs : public QObject
+{
     Q_OBJECT
 
 public:
-    MainWindow(QWidget *parent = nullptr, QString serialDeviceName = "");
-    ~MainWindow();
+    explicit PicoComs(QObject *parent = nullptr);
+    ~PicoComs();
+    
+    bool openSerialPort(QString serialPortDeviceName);
+    void closeSerialPort();
 
-private slots:
-    void on_pushButton_clicked();
+signals:
     void dataReceived(const QByteArray &data);
 
+private slots:
+    void readData();
+
 private:
-    Ui::MainWindow *ui;
-
-    QStatusBar *statusBar;
-    PicoComs m_picoComs;
-
+    bool m_isSerialPortOpen;
+    QString m_serialPortName;
+    QSerialPort *m_serialPort;
 };
-#endif  // MAINWINDOW_H
+
+#endif // PICOCOMS_H
