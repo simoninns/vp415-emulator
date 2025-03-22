@@ -25,43 +25,43 @@
 
 ************************************************************************/
 
-#include <QDebug>
-
 #include "mainwindow.h"
 #include "./ui_mainwindow.h"
 
 // https://doc.qt.io/vscodeext/vscodeext-tutorials-qt-widgets.html
 
 MainWindow::MainWindow(QWidget *parent)
-    : QMainWindow(parent)
-    , ui(new Ui::MainWindow)
-{
+    : QMainWindow(parent), ui(new Ui::MainWindow) {
     ui->setupUi(this);
 
     // Add a status bar
     statusBar = new QStatusBar();
     setStatusBar(statusBar);
     usb_device_detached();
+
+    // Handle the USB device
+    usbDevice.initialize(0x1D50, 0x7504);
+    //connect(&usbDevice, &UsbDevice::deviceConnected, this, &MainWindow::usb_device_attached);
+    //connect(&usbDevice, &UsbDevice::deviceDisconnected, this, &MainWindow::usb_device_detached);
+    usbDevice.startPolling(500);
 }
 
-MainWindow::~MainWindow()
-{
-    delete ui;
+MainWindow::~MainWindow() { delete ui; }
+
+void MainWindow::on_pushButton_clicked() {
+    qDebug() << "MainWindow::on_pushButton_clicked() - Button clicked";
 }
 
-void MainWindow::on_pushButton_clicked()
-{
-    qDebug() << "Button clicked";
+void MainWindow::usb_device_attached(uint16_t vid, uint16_t pid) {
+    qDebug() << "MainWindow::usb_device_attached() - USB device attached: VID="
+             << QString("0x%1").arg(vid, 4, 16, QChar('0'))
+             << " PID=" << QString("0x%1").arg(pid, 4, 16, QChar('0'));
+    statusBar->showMessage(
+        "USB device ready: VID=" + QString("0x%1").arg(vid, 4, 16, QChar('0')) +
+        " PID=" + QString("0x%1").arg(pid, 4, 16, QChar('0')));
 }
 
-void MainWindow::usb_device_attached()
-{
-    qDebug() << "USB device attached";
-    statusBar->showMessage("USB device ready");
-}
-
-void MainWindow::usb_device_detached()
-{
-    qDebug() << "USB device detached";
+void MainWindow::usb_device_detached() {
+    qDebug() << "MainWindow::usb_device_detached() - USB device detached";
     statusBar->showMessage("No USB device attached");
 }

@@ -24,3 +24,66 @@
     Email: simon.inns@gmail.com
 
 ************************************************************************/
+
+#ifndef USBDEVICE_H
+#define USBDEVICE_H
+
+#include <libusb-1.0/libusb.h>
+#include <QObject>
+#include <QDebug>
+#include <QTimer>
+
+class UsbDevice : public QObject
+{
+    Q_OBJECT
+
+public:
+    explicit UsbDevice(QObject *parent = nullptr);
+    ~UsbDevice();
+
+    // Initialize USB monitoring for specified VID/PID
+    bool initialize(uint16_t vendorId, uint16_t productId);
+    
+    // Check if device is currently connected
+    bool isDeviceConnected() const { return m_deviceConnected; }
+    
+    // Get device handle (nullptr if not connected)
+    libusb_device_handle* getDeviceHandle() const { return m_deviceHandle; }
+
+public slots:
+    // Start/stop device polling
+    void startPolling(int pollIntervalMs = 250);
+    void stopPolling();
+
+signals:
+    // Device connection status signals
+    void deviceConnected();
+    void deviceDisconnected();
+    void errorOccurred(const QString& errorMessage);
+
+private slots:
+    void pollForEvents();
+
+private:
+    // Device connection/disconnection handling
+    bool openDevice();
+    void closeDevice();
+    void listConnectedDevices();
+    
+    // libusb context and device handling
+    libusb_context* m_usbContext;
+    libusb_device_handle* m_deviceHandle;
+    
+    // Device identifiers
+    uint16_t m_vendorId;
+    uint16_t m_productId;
+    
+    // State tracking
+    bool m_initialized;
+    bool m_deviceConnected;
+    
+    // Polling timer
+    QTimer m_pollTimer;
+};
+
+#endif  // USBDEVICE_H

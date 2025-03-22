@@ -1,17 +1,16 @@
 /************************************************************************
 
-    main.cpp
+    statusled.h
 
-    VP415-host - A host application for the VP415 Emulator
-    VP415-Emulator
+    PicoSCSI - Raspberry Pico SCSI-1 Drive Emulator
     Copyright (C) 2025 Simon Inns
 
-    This file is part of VP415-Emulator.
+    This file is part of PicoSCSI.
 
-    This is free software: you can redistribute it and/or
-    modify it under the terms of the GNU General Public License as
-    published by the Free Software Foundation, either version 3 of the
-    License, or (at your option) any later version.
+    PicoSCSI is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
 
     This program is distributed in the hope that it will be useful,
     but WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -25,13 +24,13 @@
 
 ************************************************************************/
 
-#include <QApplication>
+#ifndef STATUSLED_H_
+#define STATUSLED_H_
 
-#include "mainwindow.h"
+// Function prototypes
+void statusledInitialise(void);
+void statusledReset(void);
 
-int main(int argc, char *argv[]) {
-    QApplication a(argc, argv);
-    MainWindow w;
-    w.show();
-    return a.exec();
-}
+void statusledActivity(uint8_t state);
+
+#endif /* STATUSLED_H_ */

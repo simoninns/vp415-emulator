@@ -1,17 +1,16 @@
 /************************************************************************
 
-    usb.h
+    fcode.h
 
-    Raspberry Pico SASI2USB adapter
-    VP415-Emulator
+    PicoSCSI - Raspberry Pico SCSI-1 Drive Emulator
     Copyright (C) 2025 Simon Inns
 
-    This file is part of VP415-Emulator.
+    This file is part of PicoSCSI.
 
-    This is free software: you can redistribute it and/or
-    modify it under the terms of the GNU General Public License as
-    published by the Free Software Foundation, either version 3 of the
-    License, or (at your option) any later version.
+    PicoSCSI is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
 
     This program is distributed in the hope that it will be useful,
     but WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -25,10 +24,14 @@
 
 ************************************************************************/
 
-#ifndef USB_H_
-#define USB_H_
+#ifndef FCODE_H_
+#define FCODE_H_
+
+// External global
+extern uint8_t scsiFcodeBuffer[256];
 
 // Function prototypes
-void initialise_usb(void);
+void fcodeWriteBuffer(uint8_t lunNumber);
+void fcodeReadBuffer(void);
 
-#endif // USB_H_
+#endif /* FCODE_H_ */

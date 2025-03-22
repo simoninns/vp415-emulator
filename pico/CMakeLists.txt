@@ -5,7 +5,7 @@ set(PICO_PLATFORM rp2350)
 set(PICO_BOARD pico2)
 include(pico_sdk_import.cmake)
 
-project(pico C CXX ASM)
+project(picoscsi C CXX ASM)
 
 set(CMAKE_C_STANDARD 11)
 set(CMAKE_CXX_STANDARD 17)
@@ -25,4 +25,4 @@ endif()
 pico_sdk_init()
 
 # Subdirectories
-add_subdirectory(sasi2usb)
+add_subdirectory(picoscsi)

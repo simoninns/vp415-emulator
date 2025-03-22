@@ -28,7 +28,10 @@
 #ifndef MAINWINDOW_H
 #define MAINWINDOW_H
 
+#include <QDebug>
 #include <QMainWindow>
+
+#include "usbdevice.h"
 
 QT_BEGIN_NAMESPACE
 namespace Ui {
@@ -36,23 +39,22 @@ class MainWindow;
 }
 QT_END_NAMESPACE
 
-class MainWindow : public QMainWindow
-{
+class MainWindow : public QMainWindow {
     Q_OBJECT
 
-public:
+   public:
     MainWindow(QWidget *parent = nullptr);
     ~MainWindow();
 
-private slots:
+   private slots:
     void on_pushButton_clicked();
+    void usb_device_attached(uint16_t vid, uint16_t pid);
+    void usb_device_detached();
 
-private:
+   private:
     Ui::MainWindow *ui;
 
     QStatusBar *statusBar;
-
-    void usb_device_attached();
-    void usb_device_detached();
+    UsbDevice usbDevice;
 };
-#endif // MAINWINDOW_H
+#endif  // MAINWINDOW_H
