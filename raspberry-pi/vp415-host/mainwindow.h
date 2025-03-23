@@ -48,7 +48,7 @@ public:
 
 private slots:
     void on_pushButton_clicked();
-    void dataReceived(const QByteArray &data);
+    void commandReceived(const QByteArray &data);
 
 private:
     Ui::MainWindow *ui;
@@ -56,5 +56,8 @@ private:
     QStatusBar *statusBar;
     PicoComs m_picoComs;
 
+    // Commands
+    void commandSetMountState(uint8_t state);
+    void commandGetMountState();
 };
 #endif  // MAINWINDOW_H

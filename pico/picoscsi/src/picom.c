@@ -41,18 +41,59 @@ void picomInitialise(void) {
     gpio_set_function(5, GPIO_FUNC_UART);
 }
 
-bool picomSendToPi(uint8_t *txData, uint8_t txLength, uint8_t *rxData, uint8_t rxLength) {
+// The underlying communication function is simple.  First 2 bytes are sent representing
+// a uint16_t length of the data to be sent.  Then the data is sent.  The Pi will then
+// respond with a uint16_t length of the data to be received.  The data is then received.
+// The function returns true if the data was received successfully and false if there was
+// a timeout.
+//
+// Note: The maximum length of data that can be sent or received is 512 bytes.
+// Note: The txLength and rxLength do not include the 2 bytes used to represent the length.
+//
+bool picomSendToPi(uint8_t *txData, uint16_t txLength, uint8_t *rxData, uint16_t *rxLength) {
+    // Send the length of the txData
+    uart_putc_raw(uart1, (txLength >> 8) & 0xFF);
+    uart_putc_raw(uart1, txLength & 0xFF);
+
     // Send the txData
     for (uint8_t i = 0; i < txLength; i++) {
         uart_putc_raw(uart1, txData[i]);
     }
 
-    // Wait for the rxData
-    absolute_time_t timeout = make_timeout_time_ms(5000);
-    for (uint8_t i = 0; i < rxLength; i++) {
-        while (!uart_is_readable_within_us(uart1, 1000)) {
-            if (get_absolute_time() > timeout) {
-                return false; // Timeout
+    // Wait for the length of the rxData
+    uint16_t rxLengthTemp = 0;
+    uint16_t timeout = 0;
+    while (uart_is_readable(uart1) == false) {
+        sleep_ms(1);
+        timeout++;
+        if (timeout > 1000) {
+            *rxLength = 0;
+            debugPrintf("picomSendToPi() - Timeout waiting for rxLength byte 0\n");
+            return false;
+        }
+    }
+    rxLengthTemp = uart_getc(uart1) << 8;
+    while (uart_is_readable(uart1) == false) {
+        sleep_ms(1);
+        timeout++;
+        if (timeout > 1000) {
+            *rxLength = 0;
+            debugPrintf("picomSendToPi() - Timeout waiting for rxLength byte 1\n");
+            return false;
+        }
+    }
+    rxLengthTemp |= uart_getc(uart1);
+    *rxLength = rxLengthTemp;
+
+    // Receive the rxData
+    for (uint16_t i = 0; i < rxLengthTemp; i++) {
+        while (uart_is_readable(uart1) == false) {
+            sleep_ms(1);
+            timeout++;
+            if (timeout > 1000) {
+                *rxLength = 0;
+                debugPrintf("picomSendToPi() - Timeout waiting for rxData byte %d of %d\n", i, rxLengthTemp);
+                return false;
             }
         }
         rxData[i] = uart_getc(uart1);
@@ -68,8 +109,9 @@ bool picomSendToPi(uint8_t *txData, uint8_t txLength, uint8_t *rxData, uint8_t r
 uint8_t picomGetMountState(void) {
     uint8_t txData[1] = {PIC_GET_MOUNT_STATE};
     uint8_t rxData[1];
+    uint16_t rxLength;
 
-    if (!picomSendToPi(txData, 1, rxData, 1)) return PIR_TIMEOUT;
+    if (!picomSendToPi(txData, 1, rxData, &rxLength)) return PIR_TIMEOUT;
 
     if (rxData[0] == 0) return PIR_FALSE;
     return PIR_TRUE;
@@ -79,8 +121,9 @@ uint8_t picomGetMountState(void) {
 uint8_t picomSetMountState(bool mountState) {
     uint8_t txData[2] = {PIC_SET_MOUNT_STATE, mountState};
     uint8_t rxData[1];
+    uint16_t rxLength;
 
-    if (!picomSendToPi(txData, 2, rxData, 1)) return PIR_TIMEOUT;
+    if (!picomSendToPi(txData, 2, rxData, &rxLength)) return PIR_TIMEOUT;
 
     if (rxData[0] == 0) return PIR_FALSE;
     return PIR_TRUE;

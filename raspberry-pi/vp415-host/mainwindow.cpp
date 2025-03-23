@@ -40,7 +40,7 @@ MainWindow::MainWindow(QWidget *parent, QString serialDeviceName)
 
     // Connect the PicoComs dataReceived signal to the MainWindow slot
     connect(&m_picoComs, &PicoComs::dataReceived, this, [this](const QByteArray &data) {
-        qDebug() << "MainWindow::dataReceived() - Data received: " << data;
+        commandReceived(data);
     });
 
     // Open the serial port
@@ -56,6 +56,32 @@ void MainWindow::on_pushButton_clicked() {
     qDebug() << "MainWindow::on_pushButton_clicked() - Button clicked";
 }
 
-void MainWindow::dataReceived(const QByteArray &data) {
-    qDebug() << "MainWindow::dataReceived() - Data received: " << data;
+void MainWindow::commandReceived(const QByteArray &data) {
+    uint8_t command = static_cast<uint8_t>(data[0]);
+    qDebug() << "MainWindow::dataReceived() - Command received: " << command;
+
+    // Process the command
+    switch(command) {
+        case 0x01: // PIC_SET_MOUNT_STATE:
+            qDebug() << "MainWindow::dataReceived() - PIC_SET_MOUNT_STATE";
+            commandSetMountState(data[1]);
+            break;
+        case 0x02: // PIC_GET_MOUNT_STATE:
+            qDebug() << "MainWindow::dataReceived() - PIC_GET_MOUNT_STATE";
+            commandGetMountState();
+            break;
+        default:
+            qDebug() << "MainWindow::dataReceived() - Unknown command: " << data[0];
+            break;
+    }
+}
+
+void MainWindow::commandSetMountState(uint8_t state) {
+    qDebug() << "MainWindow::commandSetMountState() - State: " << state;
+    m_picoComs.writeData(QByteArray(1, 0x00));
+}
+
+void MainWindow::commandGetMountState() {
+    qDebug() << "MainWindow::commandGetMountState()";
+    m_picoComs.writeData(QByteArray(1, 0x00));
 }

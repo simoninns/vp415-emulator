@@ -43,6 +43,7 @@
 
 // Function prototypes
 void picomInitialise(void);
+bool picomSendToPi(uint8_t *txData, uint16_t txLength, uint8_t *rxData, uint16_t *rxLength);
 
 // Commands
 uint8_t picomGetMountState(void);

@@ -43,6 +43,8 @@ public:
     bool openSerialPort(QString serialPortDeviceName);
     void closeSerialPort();
 
+    void writeData(QByteArray txData);
+
 signals:
     void dataReceived(const QByteArray &data);
 

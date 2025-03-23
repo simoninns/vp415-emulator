@@ -72,6 +72,9 @@ bool PicoComs::openSerialPort(QString serialPortDeviceName) {
         return false;
     }
 
+    // Flush the serial port
+    m_serialPort->clear(QSerialPort::AllDirections);
+
     return true;
 }
 
@@ -83,13 +86,48 @@ void PicoComs::closeSerialPort() {
     }
 }
 
-void PicoComs::readData()
-{
-    if (m_isSerialPortOpen) {
-        QByteArray data = m_serialPort->readAll();
-        if (!data.isEmpty()) {
-            qDebug() << "PicoComs::readData() - Data received:" << data;
-            emit dataReceived(data);
+// The underlying communication function is simple.  First 2 bytes are received representing
+// a uint16_t length of the data to be sent from the pico.  Then the data is received.  We will then
+// respond with a uint16_t length of the data to be sent.  The data is then sent
+// Note: The maximum length of data that can be sent or received is 512 bytes.
+// Note: The txLength and rxLength do not include the 2 bytes used to represent the length.
+//
+// We will continue to read data until we have received the expected number of bytes, then we will
+// emit a signal to the main window to process the data.  The main window will then respond with the
+// data to be sent back to the pico.
+void PicoComs::readData() {
+    // Read the first 2 bytes to get the length of the data to be received
+    if (m_serialPort->bytesAvailable() < 2) {
+        return;
+    }
+    
+    QByteArray rxData = m_serialPort->read(2);
+    uint16_t rxLength = (static_cast<uint16_t>(rxData[0]) << 8) | static_cast<uint16_t>(rxData[1]);
+
+    qDebug() << "PicoComs::readData() - Expecting data length: " << rxLength << " rxData[0]: " << static_cast<uint16_t>(rxData[0]) << " rxData[1]: " << static_cast<uint16_t>(rxData[1]);
+    
+    // Read the data
+    while (m_serialPort->bytesAvailable() < rxLength) {
+        if (!m_serialPort->waitForReadyRead(1000)) {
+            qDebug() << "PicoComs::readData() - Timed out waiting for data";
+            return;
         }
     }
+    
+    rxData = m_serialPort->read(rxLength);
+    
+    // Emit the signal to the main window to process the data
+    emit dataReceived(rxData);
+}
+
+void PicoComs::writeData(QByteArray txData) {
+    // Write the length of the data to be sent
+    uint16_t txLength = txData.length();
+    QByteArray txLengthData;
+
+    txLengthData.append((txLength >> 8) & 0xFF);
+    txLengthData.append(txLength & 0xFF);
+    
+    m_serialPort->write(txLengthData);
+    m_serialPort->write(txData);
 }
