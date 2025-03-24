@@ -333,17 +333,6 @@ bool filesystemSetLunStatus(uint8_t lunNumber, bool lunStatus) {
         // If the LUN image is starting the file system needs to recheck the LUN
         // and LUN descriptor to ensure everything is up to date
 
-        // Check that the currently selected LUN directory exists (and, if not,
-        // create it)
-        if (!filesystemCheckLunDirectory(filesystemState.lunDirectory)) {
-            // Failed!
-            if (debugFlag_filesystem)
-                debugPrintf(
-                    "File system: filesystemSetLunStatus(): ERROR: Could not "
-                    "access LUN image directory!\r\n");
-            return false;
-        }
-
         // Check that the LUN image exists
         if (!filesystemCheckLunImage(lunNumber)) {
             // Failed!
@@ -424,168 +413,6 @@ void filesystemReadLunUserCode(uint8_t lunNumber, uint8_t userCode[5]) {
     userCode[4] = filesystemState.fsLunUserCode[lunNumber][4];
 }
 
-// Check that the currently selected LUN directory exists (and, if not, create
-// it)
-bool filesystemCheckLunDirectory(uint8_t lunDirectory) {
-    // Is the file system mounted?
-    if (filesystemState.fsMountState == false) {
-        if (debugFlag_filesystem)
-            debugPrintf(
-                "File system: filesystemCheckLunDirectory(): ERROR: No file "
-                "system mounted\r\n");
-        return false;
-    }
-
-    if (debugFlag_filesystem)
-        debugPrintf(
-            "File system: filesystemCheckLunDirectory(): Flushing the file "
-            "system\r\n");
-    filesystemFlush();
-
-    // Does a directory exist for the currently selected LUN directory - if not,
-    // create it
-    sprintf(fileName, "/BeebSCSI%d", lunDirectory);
-
-    filesystemState.fsResult =
-        1;  // f_opendir(&filesystemState.dirObject, fileName);
-
-    // Check the result
-    if (filesystemState.fsResult != 0) {
-        switch (filesystemState.fsResult) {
-            case 1:
-                if (debugFlag_filesystem)
-                    debugPrintf(
-                        "File system: filesystemCheckLunDirectory(): f_opendir "
-                        "returned FR_NO_PATH - Directory does not exist\r\n");
-                break;
-
-            case 2:
-                if (debugFlag_filesystem)
-                    debugPrintf(
-                        "File system: filesystemCheckLunDirectory(): ERROR: "
-                        "f_opendir returned FR_DISK_ERR\r\n");
-                return false;
-                break;
-
-            case 3:
-                if (debugFlag_filesystem)
-                    debugPrintf(
-                        "File system: filesystemCheckLunDirectory(): ERROR: "
-                        "f_opendir returned FR_INT_ERR\r\n");
-                return false;
-                break;
-
-            case 4:
-                if (debugFlag_filesystem)
-                    debugPrintf(
-                        "File system: filesystemCheckLunDirectory(): ERROR: "
-                        "f_opendir returned FR_INVALID_NAME\r\n");
-                return false;
-                break;
-
-            case 5:
-                if (debugFlag_filesystem)
-                    debugPrintf(
-                        "File system: filesystemCheckLunDirectory(): ERROR: "
-                        "f_opendir returned FR_INVALID_OBJECT\r\n");
-                return false;
-                break;
-
-            case 6:
-                if (debugFlag_filesystem)
-                    debugPrintf(
-                        "File system: filesystemCheckLunDirectory(): ERROR: "
-                        "f_opendir returned FR_INVALID_DRIVE\r\n");
-                return false;
-                break;
-
-            case 7:
-                if (debugFlag_filesystem)
-                    debugPrintf(
-                        "File system: filesystemCheckLunDirectory(): ERROR: "
-                        "f_opendir returned FR_NOT_ENABLED\r\n");
-                return false;
-                break;
-
-            case 8:
-                if (debugFlag_filesystem)
-                    debugPrintf(
-                        "File system: filesystemCheckLunDirectory(): ERROR: "
-                        "f_opendir returned FR_NO_FILESYSTEM\r\n");
-                return false;
-                break;
-
-            case 9:
-                if (debugFlag_filesystem)
-                    debugPrintf(
-                        "File system: filesystemCheckLunDirectory(): ERROR: "
-                        "f_opendir returned FR_TIMEOUT\r\n");
-                return false;
-                break;
-
-            case 10:
-                if (debugFlag_filesystem)
-                    debugPrintf(
-                        "File system: filesystemCheckLunDirectory(): ERROR: "
-                        "f_opendir returned FR_NOT_ENOUGH_CORE\r\n");
-                return false;
-                break;
-
-            case 11:
-                if (debugFlag_filesystem)
-                    debugPrintf(
-                        "File system: filesystemCheckLunDirectory(): ERROR: "
-                        "f_opendir returned FR_TOO_MANY_OPEN_FILES\r\n");
-                return false;
-                break;
-
-            default:
-                if (debugFlag_filesystem)
-                    debugPrintf(
-                        "File system: filesystemCheckLunDirectory(): ERROR: "
-                        "f_opendir returned unknown error\r\n");
-                return false;
-                break;
-        }
-    }
-
-    // Did a directory exist?
-    if (filesystemState.fsResult == 13) {  // FR_NO_PATH) {
-        // f_closedir(&filesystemState.dirObject);
-
-        // Create the LUN image directory - it's not present on the SD card
-        filesystemState.fsResult = -1;  // f_mkdir(fileName);
-
-        // Now open the directory
-        // filesystemState.fsResult = f_opendir(&filesystemState.dirObject,
-        // fileName);
-
-        // Check the result
-        if (filesystemState.fsResult != 0) {
-            if (debugFlag_filesystem)
-                debugPrintf(
-                    "File system: filesystemCheckLunDirectory(): ERROR: Unable "
-                    "to create LUN directory\r\n");
-            // f_closedir(&filesystemState.dirObject);
-            return false;
-        }
-
-        if (debugFlag_filesystem)
-            debugPrintf(
-                "File system: filesystemCheckLunDirectory(): Created LUN "
-                "directory entry\r\n");
-        // f_closedir(&filesystemState.dirObject);
-    } else {
-        if (debugFlag_filesystem)
-            debugPrintf(
-                "File system: filesystemCheckLunDirectory(): LUN directory "
-                "found\r\n");
-        // f_closedir(&filesystemState.dirObject);
-    }
-
-    return true;
-}
-
 // Function to scan for SCSI LUN image file on the mounted file system
 // and check the image is valid.
 bool filesystemCheckLunImage(uint8_t lunNumber) {
@@ -598,259 +425,34 @@ bool filesystemCheckLunImage(uint8_t lunNumber) {
             "system\r\n");
     filesystemFlush();
 
-    // Attempt to open the LUN image
-    sprintf(fileName, "/BeebSCSI%d/scsi%d.dat", filesystemState.lunDirectory,
-            lunNumber);
-    if (debugFlag_filesystem)
-        debugPrintf(
-            "File system: filesystemCheckLunImage(): Checking for (.dat) LUN "
-            "image %d",
-            lunNumber);
-    filesystemState.fsResult =
-        1;  // f_open(&filesystemState.fileObject, fileName, FA_READ);
-
-    if (filesystemState.fsResult != 0) {
-        if (debugFlag_filesystem) {
-            switch (filesystemState.fsResult) {
-                case 1:
-                    debugPrintf(
-                        "File system: filesystemCheckLunImage(): ERROR: f_open "
-                        "on LUN image returned FR_DISK_ERR\r\n");
-                    break;
-
-                case 2:
-                    debugPrintf(
-                        "File system: filesystemCheckLunImage(): ERROR: f_open "
-                        "on LUN image returned FR_INT_ERR\r\n");
-                    break;
-
-                case 3:
-                    debugPrintf(
-                        "File system: filesystemCheckLunImage(): ERROR: f_open "
-                        "on LUN image returned FR_NOT_READY\r\n");
-                    break;
-
-                case 4:
-                    debugPrintf(
-                        "File system: filesystemCheckLunImage(): LUN image not "
-                        "found\r\n");
-                    break;
-
-                case 5:
-                    debugPrintf(
-                        "File system: filesystemCheckLunImage(): ERROR: f_open "
-                        "on LUN image returned FR_NO_PATH\r\n");
-                    break;
-
-                case 6:
-                    debugPrintf(
-                        "File system: filesystemCheckLunImage(): ERROR: f_open "
-                        "on LUN image returned FR_INVALID_NAME\r\n");
-                    break;
-
-                case 7:
-                    debugPrintf(
-                        "File system: filesystemCheckLunImage(): ERROR: f_open "
-                        "on LUN image returned FR_DENIED\r\n");
-                    break;
-
-                case 8:
-                    debugPrintf(
-                        "File system: filesystemCheckLunImage(): ERROR: f_open "
-                        "on LUN image returned FR_EXIST\r\n");
-                    break;
-
-                case 9:
-                    debugPrintf(
-                        "File system: filesystemCheckLunImage(): ERROR: f_open "
-                        "on LUN image returned FR_INVALID_OBJECT\r\n");
-                    break;
-
-                case 10:
-                    debugPrintf(
-                        "File system: filesystemCheckLunImage(): ERROR: f_open "
-                        "on LUN image returned FR_WRITE_PROTECTED\r\n");
-                    break;
-
-                case 11:
-                    debugPrintf(
-                        "File system: filesystemCheckLunImage(): ERROR: f_open "
-                        "on LUN image returned FR_INVALID_DRIVE\r\n");
-                    break;
-
-                case 12:
-                    debugPrintf(
-                        "File system: filesystemCheckLunImage(): ERROR: f_open "
-                        "on LUN image returned FR_NOT_ENABLED\r\n");
-                    break;
-
-                case 13:
-                    debugPrintf(
-                        "File system: filesystemCheckLunImage(): ERROR: f_open "
-                        "on LUN image returned FR_NO_FILESYSTEM\r\n");
-                    break;
-
-                case 14:
-                    debugPrintf(
-                        "File system: filesystemCheckLunImage(): ERROR: f_open "
-                        "on LUN image returned FR_TIMEOUT\r\n");
-                    break;
-
-                case 15:
-                    debugPrintf(
-                        "File system: filesystemCheckLunImage(): ERROR: f_open "
-                        "on LUN image returned FR_LOCKED\r\n");
-                    break;
-
-                case 16:
-                    debugPrintf(
-                        "File system: filesystemCheckLunImage(): ERROR: f_open "
-                        "on LUN image returned FR_NOT_ENOUGH_CORE\r\n");
-                    break;
-
-                case 17:
-                    debugPrintf(
-                        "File system: filesystemCheckLunImage(): ERROR: f_open "
-                        "on LUN image returned FR_TOO_MANY_OPEN_FILES\r\n");
-                    break;
-
-                default:
-                    debugPrintf(
-                        "File system: filesystemCheckLunImage(): ERROR: f_open "
-                        "on LUN image returned Funknown error\r\n");
-                    break;
-            }
-        }
+    // Ask the host if EFM data exists for the disc
+    if (picomGetEfmDataPresent() == PIR_TRUE) {
+        if (debugFlag_filesystem)
+            debugPrintf(
+                "File system: filesystemCheckLunImage(): EFM data is present "
+                "on the disc\r\n");
+    } else {
+        if (debugFlag_filesystem)
+            debugPrintf(
+                "File system: filesystemCheckLunImage(): EFM data is NOT "
+                "present on the disc\r\n");
 
         // Exit with error
         // f_close(&filesystemState.fileObject);
         return false;
     }
 
-    // Opening the LUN image was successful
-    if (debugFlag_filesystem)
-        debugPrintf(
-            "File system: filesystemCheckLunImage(): LUN image found\r\n");
+    // Get the user code from the host
+    picomGetUserCode(filesystemState.fsLunUserCode[lunNumber]);
 
-    // Get the size of the LUN image in bytes
-    lunFileSize = 0;  //(uint32_t)f_size(&filesystemState.fileObject);
-    if (debugFlag_filesystem)
-        debugPrintf(
-            "File system: filesystemCheckLunImage(): LUN size in bytes "
-            "(according to .dat) = %d",
-            lunFileSize);
-
-    // Check that the LUN file size is actually a size which ADFS can support
-    // (the number of sectors is limited to a 21 bit number) i.e. a maximum of
-    // 0x1FFFFF or 2,097,151 (* 256 bytes per sector = 512Mb = 536,870,656
-    // bytes)
-    if (lunFileSize > 536870656) {
-        if (debugFlag_filesystem)
-            debugPrintf(
-                "File system: filesystemCheckLunImage(): WARNING: The LUN file "
-                "size is greater than 512Mbs\r\n");
-    }
-
-    // Close the LUN image file
-    // f_close(&filesystemState.fileObject);
-
-    // Check if the LUN descriptor file (.dsc) is present
-    sprintf(fileName, "/BeebSCSI%d/scsi%d.dsc", filesystemState.lunDirectory,
-            lunNumber);
-
-    if (debugFlag_filesystem)
-        debugPrintf(
-            "File system: filesystemCheckLunImage(): Checking for (.dsc) LUN "
-            "descriptor %d",
-            lunNumber);
-    filesystemState.fsResult =
-        -1;  // f_open(&filesystemState.fileObject, fileName, FA_READ);
-
-    if (filesystemState.fsResult != 0) {
-        // LUN descriptor file is not found
-        if (debugFlag_filesystem)
-            debugPrintf(
-                "File system: filesystemCheckLunImage(): LUN descriptor not "
-                "found\r\n");
-        // f_close(&filesystemState.fileObject);
-
-        // Automatically create a LUN descriptor file for the LUN image
-        if (filesystemCreateDscFromLunImage(filesystemState.lunDirectory,
-                                            lunNumber, lunFileSize)) {
-            if (debugFlag_filesystem)
-                debugPrintf(
-                    "File system: filesystemCheckLunImage(): Automatically "
-                    "created .dsc for LUN image\r\n");
-        } else {
-            if (debugFlag_filesystem)
-                debugPrintf(
-                    "File system: filesystemCheckLunImage(): ERROR: "
-                    "Automatically creating .dsc for LUN image failed\r\n");
-        }
-    } else {
-        // LUN descriptor file is present
-        if (debugFlag_filesystem)
-            debugPrintf(
-                "File system: filesystemCheckLunImage(): LUN descriptor "
-                "found\r\n");
-        // f_close(&filesystemState.fileObject);
-
-        // Calculate the LUN size from the descriptor file
-        lunDscSize = filesystemGetLunSizeFromDsc(filesystemState.lunDirectory,
-                                                 lunNumber);
-        if (debugFlag_filesystem)
-            debugPrintf(
-                "File system: filesystemCheckLunImage(): LUN size in bytes "
-                "(according to .dsc) = %d",
-                lunDscSize);
-
-        // Are the file size and DSC size consistent?
-        if (lunDscSize != lunFileSize) {
-            if (debugFlag_filesystem)
-                debugPrintf(
-                    "File system: filesystemCheckLunImage(): WARNING: File "
-                    "size and DSC parameters are NOT consistent\r\n");
-        }
-    }
-
-    // Check if the LUN user code descriptor file (.ucd) is present
-    sprintf(fileName, "/BeebSCSI%d/scsi%d.ucd", filesystemState.lunDirectory,
-            lunNumber);
-
-    if (debugFlag_filesystem)
-        debugPrintf(
-            "File system: filesystemCheckLunImage(): Checking for (.ucd) LUN "
-            "user code descriptor\r\n");
-    filesystemState.fsResult =
-        -1;  // f_open(&filesystemState.fileObject, fileName, FA_READ);
-
-    if (filesystemState.fsResult != 0) {
-        // LUN descriptor file is not found
-        if (debugFlag_filesystem)
-            debugPrintf(
-                "File system: filesystemCheckLunImage(): LUN user code "
-                "descriptor not found\r\n");
-        // f_close(&filesystemState.fileObject);
-
-        // Set the user code descriptor to the default (probably not a laser
-        // disc image)
-        filesystemState.fsLunUserCode[lunNumber][0] = 0x00;
-        filesystemState.fsLunUserCode[lunNumber][1] = 0x00;
-        filesystemState.fsLunUserCode[lunNumber][2] = 0x00;
-        filesystemState.fsLunUserCode[lunNumber][3] = 0x00;
-        filesystemState.fsLunUserCode[lunNumber][4] = 0x00;
-    } else {
-        // LUN user code descriptor file is present
-        if (debugFlag_filesystem)
-            debugPrintf(
-                "File system: filesystemCheckLunImage(): LUN user code "
-                "descriptor found\r\n");
-
-        // Close the .ucd file
-        // f_close(&filesystemState.fileObject);
-
-        // Read the user code from the .ucd file
-        filesystemGetUserCodeFromUcd(filesystemState.lunDirectory, lunNumber);
+    if (debugFlag_filesystem) {
+        // Show the user code
+        debugPrintf("File system: filesystemCheckLunImage(): User code = ");
+        debugPrintf("%02X ", filesystemState.fsLunUserCode[lunNumber][0]);
+        debugPrintf("%02X ", filesystemState.fsLunUserCode[lunNumber][1]);
+        debugPrintf("%02X ", filesystemState.fsLunUserCode[lunNumber][2]);
+        debugPrintf("%02X ", filesystemState.fsLunUserCode[lunNumber][3]);
+        debugPrintf("%02X\r\n", filesystemState.fsLunUserCode[lunNumber][4]);
     }
 
     // Exit with success

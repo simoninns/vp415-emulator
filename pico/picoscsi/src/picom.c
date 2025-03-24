@@ -128,3 +128,37 @@ uint8_t picomSetMountState(bool mountState) {
     if (rxData[0] == 0) return PIR_FALSE;
     return PIR_TRUE;
 }
+
+// Check if the disc image has EFM data
+uint8_t picomGetEfmDataPresent(void) {
+    uint8_t txData[1] = {PIC_GET_EFM_DATA_PRESENT};
+    uint8_t rxData[1];
+    uint16_t rxLength;
+
+    if (!picomSendToPi(txData, 1, rxData, &rxLength)) return PIR_TIMEOUT;
+
+    if (rxData[0] == 0) return PIR_FALSE;
+    return PIR_TRUE;
+}
+
+// Get the user code
+void picomGetUserCode(uint8_t userCode[5]) {
+    uint8_t txData[1] = {PIC_GET_USER_CODE};
+    uint8_t rxData[5];
+    uint16_t rxLength;
+
+    if (!picomSendToPi(txData, 1, rxData, &rxLength)) {
+        userCode[0] = 0;
+        userCode[1] = 0;
+        userCode[2] = 0;
+        userCode[3] = 0;
+        userCode[4] = 0;
+        return;
+    }
+
+    userCode[0] = rxData[0];
+    userCode[1] = rxData[1];
+    userCode[2] = rxData[2];
+    userCode[3] = rxData[3];
+    userCode[4] = rxData[4];
+}

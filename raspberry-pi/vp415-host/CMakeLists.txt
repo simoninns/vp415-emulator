@@ -25,6 +25,8 @@ set(PROJECT_SOURCES
         mainwindow.h
         mainwindow.ui
         picocoms.cpp
+        metadata.cpp
+        efmdata.cpp
 )
 
 # Get the Git branch and revision

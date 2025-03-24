@@ -1,6 +1,6 @@
 /************************************************************************
 
-    mainwindow.h
+    efmdata.h
 
     VP415-host - A host application for the VP415 Emulator
     VP415-Emulator
@@ -25,51 +25,32 @@
 
 ************************************************************************/
 
-#ifndef MAINWINDOW_H
-#define MAINWINDOW_H
+#ifndef EFM_DATA_H
+#define EFM_DATA_H
 
+#include <QObject>
+#include <QFile>
+#include <QByteArray>
 #include <QDebug>
-#include <QMainWindow>
-#include <QFileInfo>
 
-#include "picocoms.h"
-#include "metadata.h"
-#include "efmdata.h"
-
-QT_BEGIN_NAMESPACE
-namespace Ui {
-class MainWindow;
-}
-QT_END_NAMESPACE
-
-class MainWindow : public QMainWindow {
+class EfmData : public QObject
+{
     Q_OBJECT
 
 public:
-    MainWindow(QWidget *parent = nullptr, QString serialDeviceName = "", QString jsonFilename = "");
-    ~MainWindow();
+    explicit EfmData(QObject *parent = nullptr);
+    ~EfmData();
 
-private slots:
-    void on_pushButton_clicked();
-    void commandReceived(const QByteArray &data);
+    bool openEfmData(QString efmDataFilename);
+    void closeEfmData();
+
+    bool hasEfmData() const { return m_hasEfmData; }
+    QByteArray getEfmSectorData(uint16_t sectorNumber) const;
 
 private:
-    Ui::MainWindow *ui;
-
-    QStatusBar *statusBar;
-    PicoComs m_picoComs;
-    Metadata m_metadata;
-    EfmData m_efmData;
-
-    bool openDisc(QString jsonFilename);
-
-    // Command variables
-    bool m_mountState;
-
-    // Commands
-    void commandSetMountState(uint8_t state);
-    void commandGetMountState();
-    void commandGetEfmDataPresent();
-    void commandGetUserCode();
+    bool m_hasEfmData;
+    QByteArray m_efmData[256];
+    QFile *m_efmFile;
 };
-#endif  // MAINWINDOW_H
+
+#endif // EFM_DATA_H

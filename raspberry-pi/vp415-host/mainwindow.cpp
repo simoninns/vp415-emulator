@@ -30,7 +30,7 @@
 
 // https://doc.qt.io/vscodeext/vscodeext-tutorials-qt-widgets.html
 
-MainWindow::MainWindow(QWidget *parent, QString serialDeviceName)
+MainWindow::MainWindow(QWidget *parent, QString serialDeviceName, QString jsonFilename)
     : QMainWindow(parent), ui(new Ui::MainWindow) {
     ui->setupUi(this);
 
@@ -48,6 +48,17 @@ MainWindow::MainWindow(QWidget *parent, QString serialDeviceName)
         qDebug() << "MainWindow::MainWindow() - Failed to open serial port: " << serialDeviceName;
         exit(EXIT_FAILURE);
     }
+
+    // Open the initial disc
+    if (jsonFilename != "") {
+        openDisc(jsonFilename);
+    } else {
+        qDebug() << "MainWindow::MainWindow() - For BETA you must specify a JSON filename";
+        exit(EXIT_FAILURE);
+    }
+
+    // Initial command states
+    m_mountState = false;
 }
 
 MainWindow::~MainWindow() { delete ui; }
@@ -58,17 +69,24 @@ void MainWindow::on_pushButton_clicked() {
 
 void MainWindow::commandReceived(const QByteArray &data) {
     uint8_t command = static_cast<uint8_t>(data[0]);
-    qDebug() << "MainWindow::dataReceived() - Command received: " << command;
 
     // Process the command
     switch(command) {
         case 0x01: // PIC_SET_MOUNT_STATE:
-            qDebug() << "MainWindow::dataReceived() - PIC_SET_MOUNT_STATE";
+            qDebug() << "MainWindow::dataReceived() - Command received: PIC_SET_MOUNT_STATE";
             commandSetMountState(data[1]);
             break;
         case 0x02: // PIC_GET_MOUNT_STATE:
-            qDebug() << "MainWindow::dataReceived() - PIC_GET_MOUNT_STATE";
+            qDebug() << "MainWindow::dataReceived() - Command received: PIC_GET_MOUNT_STATE";
             commandGetMountState();
+            break;
+        case 0x03: // PIC_GET_EFM_DATA_PRESENT:
+            qDebug() << "MainWindow::dataReceived() - Command received: PIC_GET_EFM_DATA_PRESENT";
+            commandGetEfmDataPresent();
+            break;
+        case 0x04: // PIC_GET_USER_CODE:
+            qDebug() << "MainWindow::dataReceived() - Command received: PIC_GET_USER_CODE";
+            commandGetUserCode();
             break;
         default:
             qDebug() << "MainWindow::dataReceived() - Unknown command: " << data[0];
@@ -76,12 +94,67 @@ void MainWindow::commandReceived(const QByteArray &data) {
     }
 }
 
+// Open the disc specified by the JSON filename
+bool MainWindow::openDisc(QString jsonFilename) {
+    if (!m_metadata.loadMetadata(jsonFilename)) {
+        qDebug() << "MainWindow::openDisc() - Failed to load metadata for: " << jsonFilename;
+        return false;
+    }
+
+    m_metadata.showMetadata();
+
+    // Get the EFM data filename from the metadata
+    QString efmDataFilename = m_metadata.getAivData();
+
+    // The EFM data file is relative to the JSON file, so we need to extract the path
+    QFileInfo jsonFileInfo(jsonFilename);
+    efmDataFilename = jsonFileInfo.path() + "/" + efmDataFilename;
+
+    if (!m_efmData.openEfmData(efmDataFilename)) {
+        qDebug() << "MainWindow::openDisc() - Failed to open EFM data file: " << efmDataFilename;
+        return false;
+    }
+
+    return true;
+}
+
+// Commands ---------------------------------------------------------------
+
+
 void MainWindow::commandSetMountState(uint8_t state) {
-    qDebug() << "MainWindow::commandSetMountState() - State: " << state;
-    m_picoComs.writeData(QByteArray(1, 0x00));
+    bool newState = (state == 0x01) ? true : false;
+    if (m_mountState != newState) {
+        m_mountState = newState;
+        qDebug() << "MainWindow::commandSetMountState() - State: " << state;
+        m_picoComs.writeData(QByteArray(1, 0x01));
+    } else {
+        qDebug() << "MainWindow::commandSetMountState() - State already set to: " << state;
+        m_picoComs.writeData(QByteArray(1, 0x00));
+    }
 }
 
 void MainWindow::commandGetMountState() {
-    qDebug() << "MainWindow::commandGetMountState()";
-    m_picoComs.writeData(QByteArray(1, 0x00));
+    if (m_mountState == false) {
+        qDebug() << "MainWindow::commandGetMountState() - EFM data is not mounted";
+        m_picoComs.writeData(QByteArray(1, 0x00));
+    } else {
+        qDebug() << "MainWindow::commandGetMountState() - EFM data is mounted";
+        m_picoComs.writeData(QByteArray(1, 0x01));
+    }    
+}
+
+void MainWindow::commandGetEfmDataPresent() {
+    if (m_efmData.hasEfmData()) {
+        qDebug() << "MainWindow::commandGetEfmDataPresent() - EFM data is present";
+        m_picoComs.writeData(QByteArray(1, 0x01));
+    } else {
+        qDebug() << "MainWindow::commandGetEfmDataPresent() - EFM data is not present";
+        m_picoComs.writeData(QByteArray(1, 0x00));
+    }
+}
+
+void MainWindow::commandGetUserCode() {
+    QString userCode = m_metadata.getAivUserCode();
+    qDebug() << "MainWindow::commandGetUserCode() - User code: " << userCode;
+    m_picoComs.writeData(userCode.toUtf8());
 }

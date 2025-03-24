@@ -38,8 +38,8 @@
 #define PIC_RESET 0x00
 #define PIC_SET_MOUNT_STATE 0x01
 #define PIC_GET_MOUNT_STATE 0x02
-#define PIC_SET_LUN_STATE 0x03
-#define PIC_GET_LUN_STATE 0x04
+#define PIC_GET_EFM_DATA_PRESENT 0x03
+#define PIC_GET_USER_CODE 0x04
 
 // Function prototypes
 void picomInitialise(void);
@@ -48,5 +48,7 @@ bool picomSendToPi(uint8_t *txData, uint16_t txLength, uint8_t *rxData, uint16_t
 // Commands
 uint8_t picomGetMountState(void);
 uint8_t picomSetMountState(bool mountState);
+uint8_t picomGetEfmDataPresent(void);
+void picomGetUserCode(uint8_t userCode[5]);
 
 #endif /* PICOM_H_ */

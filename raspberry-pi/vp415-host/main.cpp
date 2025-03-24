@@ -44,12 +44,18 @@ int main(int argc, char *argv[]) {
     // Set up the command line parser
     QCommandLineParser parser;
     parser.setApplicationDescription(
-            "efm-decoder-f2 - EFM T-values to F2 Section decoder\n"
+            "vp415-host - VP415 Emulator host\n"
             "\n"
             "(c)2025 Simon Inns\n"
             "GPLv3 Open-Source - github: https://github.com/simoninns/efm-tools");
     parser.addHelpOption();
     parser.addVersionOption();
+
+    // Add an option for specifying the JSON file of the initial disc to open
+    QCommandLineOption jsonFileOption(QStringList() << "j" << "json",
+        QCoreApplication::translate("main", "Specify the JSON file of the initial disc to open"),
+        QCoreApplication::translate("main", "file"));
+    parser.addOption(jsonFileOption);
 
     // -- Positional arguments --
     parser.addPositionalArgument("serialport",
@@ -57,6 +63,9 @@ int main(int argc, char *argv[]) {
     
     // Process the command line options and arguments given by the user
     parser.process(app);
+
+    // Get the JSON file argument from the parser
+    QString jsonFilename = parser.value(jsonFileOption);
 
     // Get the filename arguments from the parser
     QString serialDeviceName;
@@ -69,7 +78,7 @@ int main(int argc, char *argv[]) {
     serialDeviceName = positionalArguments.at(0);
 
     // Get on with the main window
-    MainWindow mainWindow(nullptr, serialDeviceName);
+    MainWindow mainWindow(nullptr, serialDeviceName, jsonFilename);
     mainWindow.show();
 
     return app.exec();
