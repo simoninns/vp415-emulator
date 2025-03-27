@@ -1,7 +1,7 @@
 /************************************************************************
     
-    syncseperator.v
-    Csync seperator
+    hsyncseparator.v
+    Csync to Hsync separator
     
     VP415-Emulator FPGA
     Copyright (C) 2025 Simon Inns
@@ -32,7 +32,7 @@
 // We therefore expect the csync signal to be high for 60 µs and low for 4 µs.
 
 module hsync_separator (
-    input wire clk,           // 100 MHz clock
+    input wire clk,           // 81 MHz clock
     input wire comp_sync,     // Composite sync input (XOR'd HSYNC/VSYNC)
     output reg hsync_out,     // Reconstructed HSYNC
 );
@@ -49,9 +49,9 @@ module hsync_separator (
     // Simple HSYNC detector based on falling edges
     reg [12:0] hsync_timer = 0;
     reg [12:0] hsync_period_counter = 0;
-    localparam HSYNC_PERIOD_CYCLES = 6400; // ~64 us at 100 MHz
-    localparam HSYNC_PULSE_WIDTH = 470;    // ~4.7 us pulse width
-    localparam HSYNC_MIN_PERIOD = 5500;    // ~55 us minimum between pulses to ignore serrations
+    localparam HSYNC_PERIOD_CYCLES = 5184; // ~64 us at 81 MHz
+    localparam HSYNC_PULSE_WIDTH = 380;    // ~4.7 us pulse width at 81 MHz
+    localparam HSYNC_MIN_PERIOD = 4455;    // ~55 us minimum between pulses to ignore serrations at 81 MHz
 
     always @(posedge clk) begin
         if (hsync_timer < HSYNC_PERIOD_CYCLES)

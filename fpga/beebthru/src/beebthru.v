@@ -60,19 +60,40 @@ module top(
     // Initial test - output the csync to the picoscope
     assign picoScope[0] = aiv_cSyncIn;
     assign picoScope[1] = hsync_out;
-    assign picoScope[2] = 0;
-    assign picoScope[3] = 0;
-    assign picoScope[4] = 0;
+    assign picoScope[2] = vsync_out;
+    assign picoScope[3] = pixelClockX6_out;
+    assign picoScope[4] = pixelClockX1_en;
     assign picoScope[15:5] = 0;
 
     // -----------------------------------------------------------
-    // Csync separator
+    // Pixel clock generation PLL
 
+    // We use the Pi's DPI pixel clock as a base and multiply it
+    // by 10.  The module also produces a /6 enable signal running
+    // at the original pixel clock's rate.
+    wire pixelClock_piIn;
+    assign pixelClock_piIn = pi_gpio[0];
+
+    wire pixelClock;
+    wire pixelClockX6_out;
+    wire pixelClockX1_en;
+
+    pixelclockpll pixelclockpll0 (
+        // Inputs
+        .pixelClockIn(pixelClock_piIn),
+        
+        // Outputs
+        .pixelClockX6_out(pixelClockX6_out),
+        .pixelClockX1_en(pixelClockX1_en)
+    );
+
+    // -----------------------------------------------------------
+    // Csync to Hsync separator
     wire hsync_out;
 
     hsync_separator hsync_separator0 (
         // Inputs
-        .clk(clock100Mhz),
+        .clk(pixelClockX6_out),
         .comp_sync(aiv_cSyncIn),
 
         // Outputs
@@ -80,31 +101,29 @@ module top(
     );
 
     // -----------------------------------------------------------
+    // Csync to Vsync separator
+    wire vsync_out;
+
+    vsync_separator vsync_separator0 (
+        // Inputs
+        .clk(pixelClockX6_out),
+        .comp_sync(aiv_cSyncIn),
+
+        // Outputs
+        .vsync_out(vsync_out)
+    );
+
+    // -----------------------------------------------------------
     // Clock generation PLL
 
-    // wire ref_clk;
+    // wire pixel_clk;
 
-    // csync_prescaler csync_prescaler0 (
+    // aiv_pixelclk_pll aiv_pixelclk_pll0 (
     //     // Inputs
-    //     .clk_100mhz(clock100Mhz),
-    //     .csync(aivCSyncIn),
+    //     .hsync_clk(hsync_out),
 
     //     // Outputs
-    //     .pixel_clk(aivPixelClock),
-    //     .ref_clk(ref_clk)
-    // );
-
-    // wire aivPixelClock;
-    // wire ref_clk;
-
-    // csync_to_pixel_clock csync_to_pixel_clock0 (
-    //     // Inputs
-    //     .clk_100mhz(clock100Mhz),
-    //     .csync(aivCSyncIn),
-
-    //     // Outputs
-    //     .pixel_clk(aivPixelClock),
-    //     .ref_clk(ref_clk)
+    //     .pixel_clk(pixel_clk)
     // );
 
     // -----------------------------------------------------------
