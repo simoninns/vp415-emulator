@@ -11,7 +11,7 @@ set(TARGET_NAME beebthru)
 set(VERILOG_SRC_DIR ${CMAKE_CURRENT_SOURCE_DIR}/src)
 set(SRC_MODULES
     ${VERILOG_SRC_DIR}/${TARGET_NAME}.v
-    ${VERILOG_SRC_DIR}/syncseparator.v
+    ${VERILOG_SRC_DIR}/hsyncseparator.v
 )
 
 # Target JSON file

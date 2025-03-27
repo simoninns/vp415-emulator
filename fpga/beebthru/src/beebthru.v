@@ -45,10 +45,10 @@ module top(
     output cSyncScart,
 
     // RGB111 DIN input with composite sync from BBC Master AIV
-    input aivRedIn,
-    input aivGreenIn,
-    input aivBlueIn,
-    input aivCSyncIn,
+    input aiv_redIn,
+    input aiv_greenIn,
+    input aiv_blueIn,
+    input aiv_cSyncIn,
 
     // iCE40HX8K-EVB LEDs
     output [1:0] leds,
@@ -58,25 +58,25 @@ module top(
 );
 
     // Initial test - output the csync to the picoscope
-    assign picoScope[0] = aivCSyncIn;
-    assign picoScope[1] = hsync;
-    assign picoScope[2] = vsync;
-    assign picoScope[15:3] = 0;
+    assign picoScope[0] = aiv_cSyncIn;
+    assign picoScope[1] = hsync_out;
+    assign picoScope[2] = 0;
+    assign picoScope[3] = 0;
+    assign picoScope[4] = 0;
+    assign picoScope[15:5] = 0;
 
     // -----------------------------------------------------------
     // Csync separator
 
-    wire hsync;
-    wire vsync;
+    wire hsync_out;
 
-    sync_extractor sync_extractor0 (
+    hsync_separator hsync_separator0 (
         // Inputs
         .clk(clock100Mhz),
-        .sync_in(aivCSyncIn),
+        .comp_sync(aiv_cSyncIn),
 
         // Outputs
-        .h_sync(hsync),
-        .v_sync(vsync)
+        .hsync_out(hsync_out)
     );
 
     // -----------------------------------------------------------

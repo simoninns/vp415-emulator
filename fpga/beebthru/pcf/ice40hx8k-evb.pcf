@@ -76,14 +76,16 @@ set_io -nowarn blue_scartOut[5] J4
 
 set_io -nowarn cSyncScart H5
 
-set_io -nowarn aivRedIn H6
-set_io -nowarn aivGreenIn F2
-set_io -nowarn aivBlueIn H3
-set_io -nowarn aivCSyncIn F3
+set_io -nowarn aiv_redIn H6
+set_io -nowarn aiv_greenIn F2
+set_io -nowarn aiv_blueIn H3
+set_io -nowarn aiv_cSyncIn F1
+
+set_io -nowarn gpio1_34 F3
 
 set_io -nowarn gpio1_22 G2
 set_io -nowarn gpio1_24 H4
-set_io -nowarn gpio1_26 F1
+
 set_io -nowarn gpio1_31 E2
 set_io -nowarn gpio1_33 G3
 
