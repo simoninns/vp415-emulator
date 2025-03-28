@@ -580,6 +580,18 @@
     [
       "7b445568-03fe-40e2-a66c-5ee4a3a3e08c",
       "Root"
+    ],
+    [
+      "629dc502-4c6b-44da-b519-e0fa14731a2b",
+      "Audio Filter"
+    ],
+    [
+      "6f272131-a907-4be2-80f6-6d700ae934f3",
+      "RGB DAC"
+    ],
+    [
+      "ee8be4bd-2c59-4e45-8537-3bd0532c75ca",
+      "RGB Input"
     ]
   ],
   "text_variables": {}
