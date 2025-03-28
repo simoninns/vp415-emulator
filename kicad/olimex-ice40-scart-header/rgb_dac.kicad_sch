@@ -2427,6 +2427,7 @@
 	)
 	(label "Dig_Red3"
 		(at 113.03 100.33 0)
+		(fields_autoplaced yes)
 		(effects
 			(font
 				(size 1.27 1.27)
@@ -2437,6 +2438,7 @@
 	)
 	(label "Dig_Blue4"
 		(at 163.83 90.17 0)
+		(fields_autoplaced yes)
 		(effects
 			(font
 				(size 1.27 1.27)
@@ -2447,6 +2449,7 @@
 	)
 	(label "Dig_Blue5"
 		(at 163.83 80.01 0)
+		(fields_autoplaced yes)
 		(effects
 			(font
 				(size 1.27 1.27)
@@ -2457,6 +2460,7 @@
 	)
 	(label "Dig_Red4"
 		(at 113.03 90.17 0)
+		(fields_autoplaced yes)
 		(effects
 			(font
 				(size 1.27 1.27)
@@ -2467,6 +2471,7 @@
 	)
 	(label "Dig_Blue3"
 		(at 163.83 100.33 0)
+		(fields_autoplaced yes)
 		(effects
 			(font
 				(size 1.27 1.27)
@@ -2477,6 +2482,7 @@
 	)
 	(label "Dig_Green4"
 		(at 137.16 90.17 0)
+		(fields_autoplaced yes)
 		(effects
 			(font
 				(size 1.27 1.27)
@@ -2487,6 +2493,7 @@
 	)
 	(label "Dig_Green5"
 		(at 137.16 80.01 0)
+		(fields_autoplaced yes)
 		(effects
 			(font
 				(size 1.27 1.27)
@@ -2497,6 +2504,7 @@
 	)
 	(label "Dig_Blue1"
 		(at 163.83 120.65 0)
+		(fields_autoplaced yes)
 		(effects
 			(font
 				(size 1.27 1.27)
@@ -2507,6 +2515,7 @@
 	)
 	(label "Dig_Green1"
 		(at 137.16 120.65 0)
+		(fields_autoplaced yes)
 		(effects
 			(font
 				(size 1.27 1.27)
@@ -2517,6 +2526,7 @@
 	)
 	(label "Dig_Green2"
 		(at 137.16 110.49 0)
+		(fields_autoplaced yes)
 		(effects
 			(font
 				(size 1.27 1.27)
@@ -2527,6 +2537,7 @@
 	)
 	(label "Dig_Green3"
 		(at 137.16 100.33 0)
+		(fields_autoplaced yes)
 		(effects
 			(font
 				(size 1.27 1.27)
@@ -2537,6 +2548,7 @@
 	)
 	(label "Dig_Red0"
 		(at 113.03 130.81 0)
+		(fields_autoplaced yes)
 		(effects
 			(font
 				(size 1.27 1.27)
@@ -2547,6 +2559,7 @@
 	)
 	(label "Dig_Red5"
 		(at 113.03 80.01 0)
+		(fields_autoplaced yes)
 		(effects
 			(font
 				(size 1.27 1.27)
@@ -2557,6 +2570,7 @@
 	)
 	(label "Dig_Red1"
 		(at 113.03 120.65 0)
+		(fields_autoplaced yes)
 		(effects
 			(font
 				(size 1.27 1.27)
@@ -2567,6 +2581,7 @@
 	)
 	(label "Dig_Blue2"
 		(at 163.83 110.49 0)
+		(fields_autoplaced yes)
 		(effects
 			(font
 				(size 1.27 1.27)
@@ -2577,6 +2592,7 @@
 	)
 	(label "Dig_Red2"
 		(at 113.03 110.49 0)
+		(fields_autoplaced yes)
 		(effects
 			(font
 				(size 1.27 1.27)
@@ -2587,6 +2603,7 @@
 	)
 	(label "Dig_Green0"
 		(at 137.16 130.81 0)
+		(fields_autoplaced yes)
 		(effects
 			(font
 				(size 1.27 1.27)
@@ -2597,6 +2614,7 @@
 	)
 	(label "Dig_Blue0"
 		(at 163.83 130.81 0)
+		(fields_autoplaced yes)
 		(effects
 			(font
 				(size 1.27 1.27)

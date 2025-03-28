@@ -3648,6 +3648,16 @@
 	)
 	(wire
 		(pts
+			(xy 44.45 146.05) (xy 74.93 146.05)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "ae3fe54a-1dc0-4770-81ca-be9bbaf6480c")
+	)
+	(wire
+		(pts
 			(xy 68.58 121.92) (xy 68.58 128.27)
 		)
 		(stroke
@@ -6453,7 +6463,7 @@
 	)
 	(sheet
 		(at 29.21 130.81)
-		(size 15.24 15.24)
+		(size 15.24 17.78)
 		(fields_autoplaced yes)
 		(stroke
 			(width 0.1524)
@@ -6473,7 +6483,7 @@
 			)
 		)
 		(property "Sheetfile" "rgb_input.kicad_sch"
-			(at 29.21 146.6346 0)
+			(at 29.21 149.1746 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -6530,6 +6540,16 @@
 				(justify right)
 			)
 			(uuid "921d0eb7-aeca-428e-87e4-1de09400a6c5")
+		)
+		(pin "Csync" output
+			(at 44.45 146.05 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify right)
+			)
+			(uuid "03382028-fa06-4bfb-843f-c21e786a156a")
 		)
 		(instances
 			(project "olimex-ice40-scart-header"

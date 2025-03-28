@@ -1780,6 +1780,12 @@
 		(uuid "23852778-cb14-4dde-b2e4-5eb18705aa98")
 	)
 	(junction
+		(at 151.13 118.11)
+		(diameter 0)
+		(color 0 0 0 0)
+		(uuid "711626b8-0d81-4ba2-bb8b-9ec3dcc7a2e1")
+	)
+	(junction
 		(at 34.29 186.69)
 		(diameter 0)
 		(color 0 0 0 0)
@@ -1925,6 +1931,16 @@
 	)
 	(wire
 		(pts
+			(xy 163.83 104.14) (xy 151.13 104.14)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "0f321bc2-52d0-43a7-9078-a0dbf5a5f33a")
+	)
+	(wire
+		(pts
 			(xy 201.93 125.73) (xy 203.2 125.73)
 		)
 		(stroke
@@ -2052,6 +2068,16 @@
 			(type default)
 		)
 		(uuid "319b64c1-281f-4e7a-a0ae-161cd5f62916")
+	)
+	(wire
+		(pts
+			(xy 151.13 118.11) (xy 152.4 118.11)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "34cbc8bc-77a9-4a3d-b12c-c6d4383dc563")
 	)
 	(wire
 		(pts
@@ -2255,7 +2281,7 @@
 	)
 	(wire
 		(pts
-			(xy 146.05 118.11) (xy 152.4 118.11)
+			(xy 146.05 118.11) (xy 151.13 118.11)
 		)
 		(stroke
 			(width 0)
@@ -2322,6 +2348,16 @@
 			(type default)
 		)
 		(uuid "870f8fa2-17c2-4646-8db7-3dae44a6bf44")
+	)
+	(wire
+		(pts
+			(xy 151.13 104.14) (xy 151.13 118.11)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "8d79bdfd-0ea9-4efd-9df3-a60971e387a6")
 	)
 	(wire
 		(pts
@@ -2759,6 +2795,18 @@
 			(justify left)
 		)
 		(uuid "5913401d-6abc-4b96-ae7d-f8dc30d29f83")
+	)
+	(hierarchical_label "Csync"
+		(shape output)
+		(at 163.83 104.14 0)
+		(fields_autoplaced yes)
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+			(justify left)
+		)
+		(uuid "5bac0395-21ee-45fb-b9f9-354f5ca33e85")
 	)
 	(hierarchical_label "Green"
 		(shape output)
