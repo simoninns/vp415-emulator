@@ -17,6 +17,7 @@ set(SRC_MODULES
     ${VERILOG_SRC_DIR}/asyncsyncronizer.v
     ${VERILOG_SRC_DIR}/syncregenerator.v
     ${VERILOG_SRC_DIR}/pipixelclk.v
+    ${VERILOG_SRC_DIR}/csyncgenerator.v
 )
 
 # Target JSON file

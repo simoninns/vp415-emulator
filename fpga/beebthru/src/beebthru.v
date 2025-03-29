@@ -79,7 +79,7 @@ module top(
     assign picoScope[1] = stretched_hsync;
     assign picoScope[2] = stretched_vsync;
     assign picoScope[3] = isFieldOdd;
-    assign picoScope[4] = 0;
+    assign picoScope[4] = csync_out;
     assign picoScope[5] = 0;
     assign picoScope[15:6] = 0;
 
@@ -143,6 +143,20 @@ module top(
         .hsync(hsync),
         .vsync(vsync),
         .isFieldOdd(isFieldOdd)
+    );
+
+    // -----------------------------------------------------------
+    // Horizontal and vertical sync pulse generation (test)
+    wire csync_out;
+
+    csyncgenerator csyncgenerator0 (
+        // Inputs
+        .clk(pixelClockX6_out),
+        .hsync(hsync),
+        .vsync(vsync),
+
+        // Outputs
+        .csync(csync_out)
     );
 
     // -----------------------------------------------------------
