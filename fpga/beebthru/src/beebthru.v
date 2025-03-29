@@ -67,9 +67,17 @@ module top(
         .out_pulse(stretched_hsync)
     );
 
+    // Stretch the vsync pulse for debugging
+    wire stretched_vsync;
+    pulse_stretch pulse_stretch1 (
+        .clk(pixelClockX6_out),
+        .in_pulse(vsync),
+        .out_pulse(stretched_vsync)
+    );
+
     assign picoScope[0] = aiv_csyncIn_sync;
     assign picoScope[1] = stretched_hsync;
-    assign picoScope[2] = 0;
+    assign picoScope[2] = stretched_vsync;
     assign picoScope[3] = 0;
     assign picoScope[4] = 0;
     assign picoScope[5] = 0;
@@ -146,6 +154,14 @@ module top(
         .csync_falling(csync_falling),
         .csync_rising(csync_rising),
         .hsync(hsync)
+    );
+
+    wire vsync;
+    strip_hsync_from_csync strip_hsync_from_csync0 (
+        .clk(pixelClockX6_out),
+        .csync(aiv_csyncIn_sync),
+        .hsync_pulse(hsync),
+        .vsync_only(vsync)
     );
 
     // -----------------------------------------------------------

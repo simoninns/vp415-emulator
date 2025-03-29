@@ -15,8 +15,7 @@
     
     This program is distributed in the hope that it will be useful,
     but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-    GNU General Public License for more details.
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more details.
     
     You should have received a copy of the GNU General Public License
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
@@ -39,27 +38,20 @@ module pulse_stretch (
 );
 
 reg [3:0] counter;
-reg pulse_active;
 
 always @(posedge clk) begin
-    if (in_pulse && !pulse_active) begin
-        // Detect rising edge of in_pulse
-        pulse_active <= 1'b1;
+    if (in_pulse) begin
+        // Keep output high and reset counter to full value whenever input is high
+        out_pulse <= 1'b1;
         counter <= 4'd10;
-    end else if (pulse_active) begin
-        if (counter > 0) begin
-            // Decrement counter while active
-            counter <= counter - 1;
-        end else begin
-            // Deactivate pulse after 10 clock cycles
-            pulse_active <= 1'b0;
-        end
+    end else if (counter > 0) begin
+        // If input is low but counter is still running, keep output high
+        out_pulse <= 1'b1;
+        counter <= counter - 1;
+    end else begin
+        // Input is low and counter expired, set output low
+        out_pulse <= 1'b0;
     end
-end
-
-always @(posedge clk) begin
-    // Set out_pulse based on pulse_active
-    out_pulse <= pulse_active;
 end
 
 endmodule
