@@ -76,10 +76,10 @@ module top(
     );
 
     assign picoScope[0] = csync_out;
-    assign picoScope[1] = aiv_redIn; //_sync;
-    assign picoScope[2] = aiv_greenIn;
-    assign picoScope[3] = aiv_blueIn;
-    assign picoScope[4] = 0;
+    assign picoScope[1] = aiv_redIn_sync;
+    assign picoScope[2] = aiv_greenIn_sync;
+    assign picoScope[3] = aiv_blueIn_sync;
+    assign picoScope[4] = isFieldOdd;
     assign picoScope[5] = 0;
     assign picoScope[15:6] = 0;
 
