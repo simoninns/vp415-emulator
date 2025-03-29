@@ -75,11 +75,11 @@ module top(
         .out_pulse(stretched_vsync)
     );
 
-    assign picoScope[0] = aiv_csyncIn_sync;
-    assign picoScope[1] = stretched_hsync;
-    assign picoScope[2] = stretched_vsync;
-    assign picoScope[3] = isFieldOdd;
-    assign picoScope[4] = csync_out;
+    assign picoScope[0] = csync_out;
+    assign picoScope[1] = aiv_redIn; //_sync;
+    assign picoScope[2] = aiv_greenIn;
+    assign picoScope[3] = aiv_blueIn;
+    assign picoScope[4] = 0;
     assign picoScope[5] = 0;
     assign picoScope[15:6] = 0;
 
@@ -157,6 +157,27 @@ module top(
 
         // Outputs
         .csync(csync_out)
+    );
+
+    // -----------------------------------------------------------
+    // Output video via SCART
+    wire [5:0] red_out;
+    wire [5:0] green_out;
+    wire [5:0] blue_out;
+    assign csync_scartOut = csync_out;
+
+    // Convert RGB111 to RGB666
+    rgb111to666 rgb111to6660 (
+        // Inputs
+        .clk(pixelClockX6_out),
+        .red_in(aiv_redIn_sync),
+        .green_in(aiv_greenIn_sync),
+        .blue_in(aiv_blueIn_sync),
+
+        // Outputs
+        .red_out(red_scartOut),
+        .green_out(green_scartOut),
+        .blue_out(blue_scartOut)
     );
 
     // -----------------------------------------------------------
