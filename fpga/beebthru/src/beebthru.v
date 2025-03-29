@@ -78,7 +78,7 @@ module top(
     assign picoScope[0] = aiv_csyncIn_sync;
     assign picoScope[1] = stretched_hsync;
     assign picoScope[2] = stretched_vsync;
-    assign picoScope[3] = 0;
+    assign picoScope[3] = isFieldOdd;
     assign picoScope[4] = 0;
     assign picoScope[5] = 0;
     assign picoScope[15:6] = 0;
@@ -108,60 +108,41 @@ module top(
     // -----------------------------------------------------------
     // Syncronize the incoming async signals to the pixel clock
     // This is done using a 2-stage synchronizer to avoid metastability
-
     wire aiv_redIn_sync;
     wire aiv_greenIn_sync;
     wire aiv_blueIn_sync;
     wire aiv_csyncIn_sync;
 
-    sync2 sync_aiv_redIn (
+    sync_signals sync_signals0 (
+        // Inputs (asynchronous)
         .clk(pixelClockX6_out),
-        .async_in(aiv_redIn),
-        .sync_out(aiv_redIn_sync)
-    );
-    sync2 sync_aiv_greenIn (
-        .clk(pixelClockX6_out),
-        .async_in(aiv_greenIn),
-        .sync_out(aiv_greenIn_sync)
-    );
-    sync2 sync_aiv_blueIn (
-        .clk(pixelClockX6_out),
-        .async_in(aiv_blueIn),
-        .sync_out(aiv_blueIn_sync)
-    );
-    sync2 sync_aiv_csyncIn (
-        .clk(pixelClockX6_out),
-        .async_in(aiv_csyncIn),
-        .sync_out(aiv_csyncIn_sync)
+        .red(aiv_redIn),
+        .green(aiv_greenIn),
+        .blue(aiv_blueIn),
+        .csync(aiv_csyncIn),
+
+        // Outputs (synchronous to clk)
+        .red_sync(aiv_redIn_sync),
+        .green_sync(aiv_greenIn_sync),
+        .blue_sync(aiv_blueIn_sync),
+        .csync_sync(aiv_csyncIn_sync)
     );
 
     // -----------------------------------------------------------
-    // Composite sync to horizontal sync regenerator
-
-    wire csync_falling;
-    wire csync_rising;
-
-    csync_edges csync_edges0 (
-        .clk(pixelClockX6_out),
-        .csync(aiv_csyncIn_sync),
-        .csync_falling(csync_falling),
-        .csync_rising(csync_rising)
-    );
-
+    // PAL 576i sync regeneration
     wire hsync;
-    csync_to_hsync csync_to_hsync0 (
-        .clk(pixelClockX6_out),
-        .csync_falling(csync_falling),
-        .csync_rising(csync_rising),
-        .hsync(hsync)
-    );
-
     wire vsync;
-    strip_hsync_from_csync strip_hsync_from_csync0 (
+    wire isFieldOdd;
+
+    sync_regenerator_pal576i sync_regenerator_pal576i0 (
+        // Inputs
         .clk(pixelClockX6_out),
         .csync(aiv_csyncIn_sync),
-        .hsync_pulse(hsync),
-        .vsync_only(vsync)
+
+        // Outputs
+        .hsync(hsync),
+        .vsync(vsync),
+        .isFieldOdd(isFieldOdd)
     );
 
     // -----------------------------------------------------------

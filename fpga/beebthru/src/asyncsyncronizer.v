@@ -28,6 +28,45 @@
 // Disable Verilog implicit definitions
 `default_nettype none
 
+module sync_signals (
+    input wire clk,          // 81 MHz clock
+    input wire red,
+    input wire green,
+    input wire blue,
+    input wire csync,
+
+    output wire red_sync,
+    output wire green_sync,
+    output wire blue_sync,
+    output wire csync_sync
+);
+
+    // Synchronize the async signals to the 81 MHz clock
+    sync2 sync_red (
+        .clk(clk),
+        .async_in(red),
+        .sync_out(red_sync)
+    );
+
+    sync2 sync_green (
+        .clk(clk),
+        .async_in(green),
+        .sync_out(green_sync)
+    );
+
+    sync2 sync_blue (
+        .clk(clk),
+        .async_in(blue),
+        .sync_out(blue_sync)
+    );
+
+    sync2 sync_csync (
+        .clk(clk),
+        .async_in(csync),
+        .sync_out(csync_sync)
+    );
+endmodule
+
 // Synchronizer module for async signals
 // Note: This introduces a 2 clock cycle delay to the signal
 module sync2 (

@@ -28,6 +28,51 @@
 // Disable Verilog implicit definitions
 `default_nettype none
 
+module sync_regenerator_pal576i (
+	input wire clk,		// 81 MHz clock
+	input wire csync,	// composite sync input
+
+	output hsync,		// horizontal sync output
+	output vsync,		// vertical sync output
+	output isFieldOdd	// 1 = odd field, 0 = even
+);
+	wire csync_falling;	// falling edge of csync
+	wire csync_rising;	// rising edge of csync
+
+	// Generate the falling and rising edges of the csync signal
+	csync_edges csync_edges_inst (
+		.clk(clk),
+		.csync(csync),
+		.csync_falling(csync_falling),
+		.csync_rising(csync_rising)
+	);
+
+	// Generate the hsync pulse from the csync edges
+	csync_to_hsync csync_to_hsync_inst (
+		.clk(clk),
+		.csync_falling(csync_falling),
+		.csync_rising(csync_rising),
+		.hsync(hsync)
+	);
+
+	// Strip the hsync from the csync signal to get the vsync signal
+	strip_hsync_from_csync strip_hsync_from_csync_inst (
+		.clk(clk),
+		.csync(csync),
+		.hsync_pulse(hsync),
+		.vsync_only(vsync)
+	);
+
+	// Detect field type (odd/even) based on vsync pulse
+	detect_field_type_pal detect_field_type_pal_inst (
+		.clk(clk),
+		.hsync_pulse(hsync),
+		.vsync_pulse(vsync),
+		.field_is_odd(isFieldOdd)
+	);
+
+endmodule
+
 // This module takes the csync and outputs two pulse-trains, one containing
 // all the falling edges of csync and the other containing all the rising edges.
 module csync_edges (
@@ -143,6 +188,34 @@ module strip_hsync_from_csync (
         // Reset vsync_active when we leave the vsync mask window
         if (counter >= ACTIVE_END) begin
             vsync_active <= 1'b0;
+        end
+    end
+
+endmodule
+
+module detect_field_type_pal (
+    input  wire clk,
+    input  wire hsync_pulse,    // single-cycle
+    input  wire vsync_pulse,    // single-cycle
+    output reg  field_is_odd    // 1 = odd field, 0 = even
+);
+
+    reg [15:0] counter = 0;
+
+    // 20 us = 1620 cycles at 81 MHz
+    localparam THRESHOLD_20US = 1620;
+
+    always @(posedge clk) begin
+        // Reset/start the counter on each hsync
+        if (hsync_pulse) begin
+            counter <= 0;
+        end else if (counter < 16'hFFFF) begin
+            counter <= counter + 1;
+        end
+
+        // Sample counter on vsync pulse
+        if (vsync_pulse) begin
+            field_is_odd <= ~(counter <= THRESHOLD_20US);
         end
     end
 
