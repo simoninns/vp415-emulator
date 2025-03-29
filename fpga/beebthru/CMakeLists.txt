@@ -11,8 +11,11 @@ set(TARGET_NAME beebthru)
 set(VERILOG_SRC_DIR ${CMAKE_CURRENT_SOURCE_DIR}/src)
 set(SRC_MODULES
     ${VERILOG_SRC_DIR}/${TARGET_NAME}.v
-    ${VERILOG_SRC_DIR}/hsyncseparator.v
-    ${VERILOG_SRC_DIR}/vsyncseparator.v
+    ${VERILOG_SRC_DIR}/nreset.v
+    ${VERILOG_SRC_DIR}/statusleds.v
+    ${VERILOG_SRC_DIR}/pulsestretch.v
+    ${VERILOG_SRC_DIR}/asyncsyncronizer.v
+    ${VERILOG_SRC_DIR}/syncregenerator.v
     ${VERILOG_SRC_DIR}/pipixelclk.v
 )
 

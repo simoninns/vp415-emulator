@@ -74,12 +74,12 @@ set_io -nowarn blue_scartOut[3] J5
 set_io -nowarn blue_scartOut[4] H2
 set_io -nowarn blue_scartOut[5] J4
 
-set_io -nowarn cSyncScart H5
+set_io -nowarn csync_scartOut H5
 
-set_io -nowarn aiv_redIn H6
-set_io -nowarn aiv_greenIn F2
-set_io -nowarn aiv_blueIn H3
-set_io -nowarn aiv_cSyncIn F1
+set_io -nowarn gpio1_28 H6
+set_io -nowarn gpio1_30 F2
+set_io -nowarn gpio1_32 H3
+set_io -nowarn gpio1_26 F1
 
 set_io -nowarn gpio1_34 F3
 
@@ -123,6 +123,14 @@ set_io -nowarn gpio1_33 G3
 # set_io -nowarn SRAM_A[2] A11
 # set_io -nowarn SRAM_A[4] C10
 # set_io -nowarn SRAM_A[3] A10
+
+## EXT2 Temp TTL RGB in
+set_io -nowarn aiv_redIn B6
+set_io -nowarn aiv_greenIn C6
+set_io -nowarn aiv_blueIn D7
+set_io -nowarn aiv_csyncIn A6
+# set_io -nowarn aiv_vsyncIn D6
+# set_io -nowarn aiv_csyncIn A5
 
 ## EXT2 External 16M SRAM board (2)
 # set_io -nowarn SRAMb_D[15] B6

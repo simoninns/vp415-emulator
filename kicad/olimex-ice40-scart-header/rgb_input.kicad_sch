@@ -2423,7 +2423,7 @@
 				)
 			)
 		)
-		(property "Value" "47R"
+		(property "Value" "100R"
 			(at 128.27 102.87 90)
 			(effects
 				(font
@@ -3015,7 +3015,7 @@
 				)
 			)
 		)
-		(property "Value" "47R"
+		(property "Value" "100R"
 			(at 128.27 66.04 90)
 			(effects
 				(font
@@ -3082,7 +3082,7 @@
 				)
 			)
 		)
-		(property "Value" "47R"
+		(property "Value" "100R"
 			(at 128.27 124.46 90)
 			(effects
 				(font
@@ -3763,7 +3763,7 @@
 				)
 			)
 		)
-		(property "Value" "47R"
+		(property "Value" "100R"
 			(at 128.27 60.96 90)
 			(effects
 				(font

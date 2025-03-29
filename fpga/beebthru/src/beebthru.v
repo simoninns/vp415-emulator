@@ -42,13 +42,13 @@ module top(
     output [5:0] red_scartOut,
     output [5:0] green_scartOut,
     output [5:0] blue_scartOut,
-    output cSyncScart,
+    output csync_scartOut,
 
     // RGB111 DIN input with composite sync from BBC Master AIV
     input aiv_redIn,
     input aiv_greenIn,
     input aiv_blueIn,
-    input aiv_cSyncIn,
+    input aiv_csyncIn,
 
     // iCE40HX8K-EVB LEDs
     output [1:0] leds,
@@ -57,13 +57,23 @@ module top(
     output [15:0] picoScope,
 );
 
-    // Initial test - output the csync to the picoscope
-    assign picoScope[0] = aiv_cSyncIn;
-    assign picoScope[1] = hsync_out;
-    assign picoScope[2] = vsync_out;
-    assign picoScope[3] = pixelClockX6_out;
-    assign picoScope[4] = pixelClockX1_en;
-    assign picoScope[15:5] = 0;
+    // Picoscope output
+
+    // Stretch the hsync pulse for debugging
+    wire stretched_hsync;
+    pulse_stretch pulse_stretch0 (
+        .clk(pixelClockX6_out),
+        .in_pulse(hsync),
+        .out_pulse(stretched_hsync)
+    );
+
+    assign picoScope[0] = aiv_csyncIn_sync;
+    assign picoScope[1] = stretched_hsync;
+    assign picoScope[2] = 0;
+    assign picoScope[3] = 0;
+    assign picoScope[4] = 0;
+    assign picoScope[5] = 0;
+    assign picoScope[15:6] = 0;
 
     // -----------------------------------------------------------
     // Pixel clock generation PLL
@@ -88,65 +98,77 @@ module top(
     );
 
     // -----------------------------------------------------------
-    // Csync to Hsync separator
-    wire hsync_out;
+    // Syncronize the incoming async signals to the pixel clock
+    // This is done using a 2-stage synchronizer to avoid metastability
 
-    hsync_separator hsync_separator0 (
-        // Inputs
+    wire aiv_redIn_sync;
+    wire aiv_greenIn_sync;
+    wire aiv_blueIn_sync;
+    wire aiv_csyncIn_sync;
+
+    sync2 sync_aiv_redIn (
         .clk(pixelClockX6_out),
-        .comp_sync(aiv_cSyncIn),
-
-        // Outputs
-        .hsync_out(hsync_out)
+        .async_in(aiv_redIn),
+        .sync_out(aiv_redIn_sync)
+    );
+    sync2 sync_aiv_greenIn (
+        .clk(pixelClockX6_out),
+        .async_in(aiv_greenIn),
+        .sync_out(aiv_greenIn_sync)
+    );
+    sync2 sync_aiv_blueIn (
+        .clk(pixelClockX6_out),
+        .async_in(aiv_blueIn),
+        .sync_out(aiv_blueIn_sync)
+    );
+    sync2 sync_aiv_csyncIn (
+        .clk(pixelClockX6_out),
+        .async_in(aiv_csyncIn),
+        .sync_out(aiv_csyncIn_sync)
     );
 
     // -----------------------------------------------------------
-    // Csync to Vsync separator
-    wire vsync_out;
+    // Composite sync to horizontal sync regenerator
 
-    vsync_separator vsync_separator0 (
-        // Inputs
+    wire csync_falling;
+    wire csync_rising;
+
+    csync_edges csync_edges0 (
         .clk(pixelClockX6_out),
-        .comp_sync(aiv_cSyncIn),
-
-        // Outputs
-        .vsync_out(vsync_out)
+        .csync(aiv_csyncIn_sync),
+        .csync_falling(csync_falling),
+        .csync_rising(csync_rising)
     );
 
-    // -----------------------------------------------------------
-    // Clock generation PLL
-
-    // wire pixel_clk;
-
-    // aiv_pixelclk_pll aiv_pixelclk_pll0 (
-    //     // Inputs
-    //     .hsync_clk(hsync_out),
-
-    //     // Outputs
-    //     .pixel_clk(pixel_clk)
-    // );
+    wire hsync;
+    csync_to_hsync csync_to_hsync0 (
+        .clk(pixelClockX6_out),
+        .csync_falling(csync_falling),
+        .csync_rising(csync_rising),
+        .hsync(hsync)
+    );
 
     // -----------------------------------------------------------
     // Basic hardware functions
 
     // nReset signal generation (as the iCE40 board doesn't have one)
-    // wire nReset;
+    wire nReset;
 
-    // nreset nreset0 (
-    //     .sysClock(aivClockX6),
-    //     .nReset(nReset)
-    // );
+    nreset nreset0 (
+        .sysClock(pixelClockX6_out),
+        .nReset(nReset)
+    );
 
-    // // Status LED control
-    // wire [1:0] leds;
+    // Status LED control
+    wire [1:0] leds;
 
-    // statusleds statusleds0 (
-    //     // Inputs
-    //     .sysClock(aivClockX6),
-    //     .nReset(nReset),
+    statusleds statusleds0 (
+        // Inputs
+        .sysClock(pixelClockX6_out),
+        .nReset(nReset),
         
-    //     // Outputs
-    //     .leds(leds)
-    // );
+        // Outputs
+        .leds(leds)
+    );
 
 endmodule
