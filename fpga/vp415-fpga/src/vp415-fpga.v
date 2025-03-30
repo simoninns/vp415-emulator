@@ -159,7 +159,7 @@ module top(
     // -----------------------------------------------------------
     // Generate AIV pixel x,y and display enable signals
     wire [9:0] pixelX_aiv;
-    wire [8:0] pixelY_aiv;
+    wire [9:0] pixelY_aiv;
     wire displayEnable_aiv; // Active high when in the active display area
 
     active_frame_tracker active_frame_tracker0 (

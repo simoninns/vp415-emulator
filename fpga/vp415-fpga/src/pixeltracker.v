@@ -40,7 +40,7 @@ module active_frame_tracker (
     input wire isFieldOdd,       // 1 = odd field, 0 = even field
 
     output [9:0] active_frame_dot,  // active dot number (0-720)
-    output [8:0] active_frame_line, // active line number (0-576)
+    output [9:0] active_frame_line, // active line number (0-576)
     output display_enable           // display enable signal
 );
 
@@ -68,13 +68,13 @@ module active_frame_tracker (
     );
 
     // Generate the active frame line based on the field line and field odd signal
-    reg [8:0] active_frame_line_r = 9'b0; // 0-511
+    reg [9:0] active_frame_line_r = 9'b0; // 0-511
     reg [9:0] active_frame_dot_r = 10'b0; // 0-719
     reg display_enable_r = 1'b0;
 
     always @(posedge clk, negedge nReset) begin
         if (!nReset) begin
-            active_frame_line_r <= 9'b0;
+            active_frame_line_r <= 10'b0;
             active_frame_dot_r <= 10'b0;
             display_enable_r <= 1'b0;
         end else begin
@@ -95,7 +95,7 @@ module active_frame_tracker (
             end else begin
                 // Not in an active region, clear the display enable signal
                 display_enable_r <= 1'b0;
-                active_frame_line_r <= 9'b0;
+                active_frame_line_r <= 10'b0;
                 active_frame_dot_r <= 10'b0;
             end
         end
@@ -124,9 +124,15 @@ module active_dot_tracker (
     output isActive             // dot is active flag
 );
 
+    // Total period of the line is 64us which is 864 dots
+    // So each dot is 74.074ns
+    //
+    // There are 12us of stuff before the active region starts
+    // 12us is equivalent to 162 dots per line
+
     // Constants for active region
     localparam ACTIVE_H_START = 10'd72;  // Start of active horizontal region
-    localparam ACTIVE_H_END = 10'd792;   // End of active horizontal region
+    localparam ACTIVE_H_END = ACTIVE_H_START + 10'd719;   // End of active horizontal region
 
     // Registers for tracking dots
     reg [9:0] dot_r;        // current dot in line (0-863)
@@ -189,7 +195,7 @@ module active_line_tracker (
 
     // Constants for active region
     localparam ACTIVE_V_START = 9'd23;  // Start of active vertical region
-    localparam ACTIVE_V_END = 9'd311;   // End of active vertical region
+    localparam ACTIVE_V_END = ACTIVE_V_START + 9'd288;   // End of active vertical region
 
     // Registers for tracking lines
     reg [8:0] line_r;        // current line in field (0-311)

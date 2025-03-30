@@ -32,7 +32,7 @@ module testcard1bit(
 	input clk,
     input nReset,
     input [9:0] pixelX,
-    input [8:0] pixelY,
+    input [9:0] pixelY,
     input displayEnable,
 
     output redOut,
@@ -58,7 +58,7 @@ module testcard1bit(
             blueOut_r <= 1'b0;
         end else begin
             if (displayEnable) begin
-                if (pixelY == 40 || pixelY == 41) begin // One line in each field for testing...
+                if (pixelY < 288) begin
                     if (pixelX < (90 * 1)) begin
                         // Red
                         redOut_r <= 1'b1;
