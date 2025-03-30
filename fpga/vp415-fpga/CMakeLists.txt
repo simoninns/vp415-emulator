@@ -21,6 +21,7 @@ set(SRC_MODULES
     ${VERILOG_SRC_DIR}/testcard1bit.v
     ${VERILOG_SRC_DIR}/syncregenerator.v
     ${VERILOG_SRC_DIR}/csyncgenerator.v
+    ${VERILOG_SRC_DIR}/videomixer.v
 )
 
 # Target JSON file

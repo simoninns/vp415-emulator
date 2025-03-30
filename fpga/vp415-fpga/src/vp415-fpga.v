@@ -178,9 +178,9 @@ module top(
 
     // -----------------------------------------------------------
     // Generate a RGB111 test card
-    wire redOut;
-    wire greenOut;
-    wire blueOut;
+    wire redOut_tc;
+    wire greenOut_tc;
+    wire blueOut_tc;
 
     testcard1bit testcard1bit0 (
         // Inputs
@@ -189,6 +189,31 @@ module top(
         .pixelX(pixelX_aiv),
         .pixelY(pixelY_aiv),
         .displayEnable(displayEnable_aiv),
+
+        // Outputs
+        .redOut(redOut_tc),
+        .greenOut(greenOut_tc),
+        .blueOut(blueOut_tc)
+    );
+
+    // -----------------------------------------------------------
+    // Mix the test card and AIV RGB111 signals together
+    wire redOut;
+    wire greenOut;
+    wire blueOut;
+
+    videomixer videomixer0 (
+        // Inputs
+        .clk(sysClk),
+        .nReset(nReset),
+
+        .redIn1(redOut_tc),
+        .greenIn1(greenOut_tc),
+        .blueIn1(blueOut_tc),
+
+        .redIn0(aiv_redIn_sync),
+        .greenIn0(aiv_greenIn_sync),
+        .blueIn0(aiv_blueIn_sync),
 
         // Outputs
         .redOut(redOut),
