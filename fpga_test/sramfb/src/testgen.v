@@ -32,13 +32,13 @@ module testgen (
     input wire clk,            // Clock input
     input wire [2:0] clkPhase, // Clock phase input
     input wire reset_n,        // Active low reset
-    output reg [15:0] data     // 16-bit data output
+    output reg [2:0] data      // 3-bit data output
 );
     
     always @(posedge clk or negedge reset_n) begin
         if (!reset_n) begin
             // Reset both counters
-            data <= 16'h0000;
+            data <= 3'd0;
         end else begin
             // Increment data
             if (clkPhase == 3'b101) begin

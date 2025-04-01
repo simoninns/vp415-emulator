@@ -29,49 +29,55 @@
 `default_nettype none
 
 module videomixer(
-	input clk,
+	input pixelClockX6,
+    input [2:0] pixelClockPhase,
     input nReset,
 
-    input redIn0,
-    input greenIn0,
-    input blueIn0,
+    input [5:0] red_fg,
+    input [5:0] green_fg,
+    input [5:0] blue_fg,
 
-    input redIn1,
-    input greenIn1,
-    input blueIn1,
+    input [5:0] red_bg,
+    input [5:0] green_bg,
+    input [5:0] blue_bg,
 
-    output redOut,
-    output greenOut,
-    output blueOut
+    output [5:0] red_out,
+    output [5:0] green_out,
+    output [5:0] blue_out
 	);
 
-    reg redOut_r;
-    reg greenOut_r;
-    reg blueOut_r;
-    assign redOut = redOut_r;
-    assign greenOut = greenOut_r;
-    assign blueOut = blueOut_r;
+    reg [5:0] red_out_r;
+    reg [5:0] green_out_r;
+    reg [5:0] blue_out_r;
 
-    always @(posedge clk, negedge nReset) begin
+    always @(posedge pixelClockX6, negedge nReset) begin
         if (!nReset) begin
             // Reset
-            redOut_r <= 0;
-            greenOut_r <= 0;
-            blueOut_r <= 0;
+            red_out_r <= 6'b000000;
+            green_out_r <= 6'b000000;
+            blue_out_r <= 6'b000000;
         end
         else begin
-            // Key on black
-            if (redIn1 == 0 && greenIn1 == 0 && blueIn1 == 0) begin
-                redOut_r <= redIn0;
-                greenOut_r <= greenIn0;
-                blueOut_r <= blueIn0;
-            end
-            else begin
-                redOut_r <= redIn1;
-                greenOut_r <= greenIn1;
-                blueOut_r <= blueIn1;
+            if (pixelClockPhase == 3'b0) begin
+                // If the foreground pixel is black, use the background pixel
+                if (red_fg == 6'b0 && green_fg == 6'b0 && blue_fg == 6'b0) begin
+                    red_out_r <= red_bg;
+                    green_out_r <= green_bg;
+                    blue_out_r <= blue_bg;
+                end
+                else begin
+                    // Otherwise, use the foreground pixel
+                    red_out_r <= red_fg;
+                    green_out_r <= green_fg;
+                    blue_out_r <= blue_fg;
+                end
             end
         end
     end
+
+    // Assign the output signals
+    assign red_out = red_out_r;
+    assign green_out = green_out_r;
+    assign blue_out = blue_out_r;
 
 endmodule

@@ -16,7 +16,8 @@ set(SRC_MODULES
     ${VERILOG_SRC_DIR}/pipixelclk.v
     ${VERILOG_SRC_DIR}/syncsignals.v
     ${VERILOG_SRC_DIR}/framebuffer.v
-    ${VERILOG_SRC_DIR}/pixeltracker.v
+    ${VERILOG_SRC_DIR}/aivpixeltracker.v
+    ${VERILOG_SRC_DIR}/pipixeltracker.v
     ${VERILOG_SRC_DIR}/rgb111to666.v
     ${VERILOG_SRC_DIR}/testcard1bit.v
     ${VERILOG_SRC_DIR}/syncregenerator.v

@@ -52,15 +52,6 @@ module top(
     output SRAM0_nCS
 );
 
-    // // Picoscope output
-    // assign picoScope[0] = 0;
-    // assign picoScope[1] = 0;
-    // assign picoScope[2] = 0;
-    // assign picoScope[3] = 0;
-    // assign picoScope[4] = 0;
-    // assign picoScope[5] = 0;
-    // assign picoScope[15:6] = 0;
-
     // -----------------------------------------------------------
     // Pixel clock generation PLL
 
@@ -95,18 +86,9 @@ module top(
     // Status LED control
     wire [1:0] leds;
 
-    statusleds statusleds0 (
-        // Inputs
-        .sysClock(clk),
-        .nReset(nReset),
-        
-        // Outputs
-        .leds(leds)
-    );
-
     // -----------------------------------------------------------
     // Generate the test data
-    wire [15:0] testData;
+    wire [2:0] testData;
 
     testgen testgen0 (
         .clk(clk),
@@ -117,6 +99,9 @@ module top(
 
     // -----------------------------------------------------------
     // Framebuffer SRAM interface
+    wire [2:0] fb_out;
+    wire compare_result;
+    
     framebuffer frameBuffer0 (
         // Inputs
         .clk(clk),
@@ -127,7 +112,7 @@ module top(
         .reset_out(1'd0),
 
         .data_in(testData),
-        .data_out(picoScope[15:0]),
+        .data_out(fb_out),
 
         // SRAM
         .sram_addr(SRAM0_A),
@@ -136,6 +121,70 @@ module top(
         .sram_we_n(SRAM0_nWE),
         .sram_ce_n(SRAM0_nCS)
     );
+    
+    // -----------------------------------------------------------
+    // Framebuffer verification
+    
+    // Compare test data with framebuffer output
+    // The framebuffer has a pipeline delay that we need to account for
+    // Based on the design, data takes multiple cycles to go through the framebuffer
+    // Each 3-bit value gets packed into 16-bit words (5 values per word)
+    // Need to delay by roughly (BUFFER_SIZE * 5 * 2) clock cycles (write + read time)
+    
+    // Create a longer delay line for test data to match framebuffer latency
+    // Using a 256-entry delay line should be sufficient based on the buffer size
+    localparam DELAY_LENGTH = 256;
+    reg [2:0] test_data_delay_line [0:DELAY_LENGTH-1];
+    integer i;
+    
+    always @(posedge clk) begin
+        if (!nReset) begin
+            for (i = 0; i < DELAY_LENGTH; i = i + 1) begin
+                test_data_delay_line[i] <= 3'b000;
+            end
+        end else if (clkPhase == 3'b000) begin
+            // Shift the delay line
+            for (i = DELAY_LENGTH-1; i > 0; i = i - 1) begin
+                test_data_delay_line[i] <= test_data_delay_line[i-1];
+            end
+            test_data_delay_line[0] <= testData;
+        end
+    end
+    
+    // Use the appropriately delayed test data for comparison
+    // The exact delay value might need adjustment based on testing
+    wire [2:0] properly_delayed_data = test_data_delay_line[DELAY_LENGTH-1];
+    
+    // Simple comparison with properly delayed data
+    assign compare_result = (fb_out == properly_delayed_data);
+    
+    // Error detection - stays high if ever an error is detected
+    reg test_error;
+    always @(posedge clk) begin
+        if (!nReset) begin
+            test_error <= 1'b0;
+        end else if (clkPhase == 3'b000 && !compare_result) begin
+            test_error <= 1'b1;
+        end
+    end
+    
+    // Status LED control - indicate test results
+    statusleds statusleds0 (
+        // Inputs
+        .sysClock(clk),
+        .nReset(nReset),
+        .test_result({compare_result, !test_error}), // LED[1] = current comparison, LED[0] = overall test status
+        
+        // Outputs
+        .leds(leds)
+    );
+    
+    // Picoscope debug outputs
+    assign picoScope[2:0] = properly_delayed_data;    // Delayed test data we're comparing against
+    assign picoScope[5:3] = fb_out;                   // Framebuffer output
+    assign picoScope[6] = compare_result;             // Current comparison result
+    assign picoScope[7] = test_error;                // Error detection flag
+    assign picoScope[15:11] = 5'b0;                   // Unused bits
     
 
 endmodule

@@ -1,7 +1,7 @@
 /************************************************************************
 	
-	pixeltracker.v
-	Generate pixel x,y and display enable signals
+	aivpixeltracker.v
+	Generate pixel x,y and display enable signals for the AIV source
 	
 	VP415-Emulator FPGA
 	Copyright (C) 2025 Simon Inns
@@ -28,10 +28,10 @@
 // Disable Verilog implicit definitions
 `default_nettype none
 
-// Track the active frame.
+// Track the active AIV frame.
 // The output from this module is the active frame dot (0-719) and the
 // active line number (0-576) and the display enable signal.
-module active_frame_tracker (
+module aiv_active_frame_tracker (
     input wire clk,             // 81 MHz clock
     input wire nReset,          // active low reset
 
@@ -47,7 +47,7 @@ module active_frame_tracker (
     // Track the active field lines
     wire [8:0] active_field_line;
     wire isActiveFieldLine;
-    active_line_tracker line_tracker (
+    aiv_active_line_tracker line_tracker (
         .clk(clk),
         .nReset(nReset),
         .vsync(vsync),
@@ -59,7 +59,7 @@ module active_frame_tracker (
     // Track the active field dots
     wire [9:0] active_field_dot;
     wire isActiveFieldDot;
-    active_dot_tracker dot_tracker (
+    aiv_active_dot_tracker dot_tracker (
         .clk(clk),
         .nReset(nReset),
         .hsync(hsync),
@@ -114,7 +114,7 @@ endmodule
 // Active lines are from 23 to 311
 // Active dots are from 72 to 792
 
-module active_dot_tracker (
+module aiv_active_dot_tracker (
     input wire clk,             // 81 MHz clock
     input wire nReset,          // active low reset
 
@@ -182,7 +182,7 @@ module active_dot_tracker (
 
 endmodule
 
-module active_line_tracker (
+module aiv_active_line_tracker (
     input wire clk,             // 81 MHz clock
     input wire nReset,          // active low reset
 

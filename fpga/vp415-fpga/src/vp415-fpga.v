@@ -60,12 +60,12 @@ module top(
 
     // -----------------------------------------------------------
     // Picoscope debug output mapping
-    assign picoScope[0] = csync_scartOut;
-    assign picoScope[1] = isFieldOdd;
-    assign picoScope[2] = displayEnable_aiv;
-    assign picoScope[3] = redOut;
-    assign picoScope[4] = greenOut;
-    assign picoScope[5] = blueOut;
+    assign picoScope[0] = 0;
+    assign picoScope[1] = 0;
+    assign picoScope[2] = 0;
+    assign picoScope[3] = 0;
+    assign picoScope[4] = 0;
+    assign picoScope[5] = 0;
     assign picoScope[6] = 0;
     assign picoScope[7] = 0;
     assign picoScope[8] = 0;
@@ -78,45 +78,83 @@ module top(
     assign picoScope[15] = 0;
 
     // -----------------------------------------------------------
-    // SRAM framebuffer
-    // framebuffer framebuffer0 (
-    //     // Inputs
-    //     .clk(sysClk),
-    //     .nReset(nReset),
-
-    //     // Outputs
-    //     .SRAM0_A(SRAM0_A),
-    //     .SRAM0_D(SRAM0_D),
-    //     .SRAM0_nOE(SRAM0_nOE),
-    //     .SRAM0_nWE(SRAM0_nWE),
-    //     .SRAM0_nCS(SRAM0_nCS)
-    // );
-
-
-    // -----------------------------------------------------------
     // Pi5 Pixel clock generation PLL
 
     // We use the Pi's DPI pixel clock as a base and multiply it
-    // by 6 (=81 MHz).  The module also produces a /6 enable signal running
-    // at the original pixel clock's rate.  This is to keep everything
-    // in phase with the Pi 5's pixel clock.
-    wire pixelClock_piIn;
-    assign pixelClock_piIn = pi_gpio[0];
+    // by 6 (=81 MHz). This is to keep everything in phase with
+    // the Pi 5's pixel clock.
+    wire pixelClock_pi;
+    assign pixelClock_pi = pi_gpio[0];
 
     wire sysClk;
-    wire pixelClockX1_en;
+    wire [2:0] sysClkPhase;
 
     pipixelclockpll pipixelclockpll0 (
         // Inputs
-        .pixelClockIn(pixelClock_piIn),
+        .pixelClockIn(pixelClock_pi),
         
         // Outputs
         .pixelClockX6_out(sysClk),
-        .pixelClockX1_en(pixelClockX1_en)
+        .pixelClockPhase(sysClkPhase)
     );
 
     // -----------------------------------------------------------
-    // Syncronize the incoming async signals to the Pi's pixel clock
+    // Incoming video from the Raspberry Pi
+    // Note: Using video mode 6 (RGB666):
+    //
+    // Used GPIOs:
+    //
+    // 16-21 Red
+    // 10-15 Green
+    // 4-9 Blue
+    //
+    // 2 VSync
+    // 3 HSync
+    //
+    // 0 Pixel clock (DPICLK)
+    // 1 Display enable (DPIDE)
+
+    // DPI video input signals from the Raspberry Pi's DPI video interface
+    wire [5:0] red_pi;   // Red video from Pi (6-bit mapped to 8-bit)
+    wire [5:0] green_pi; // Green video from Pi (6-bit mapped to 8-bit)
+    wire [5:0] blue_pi;  // Blue video from Pi (6-bit mapped to 8-bit)
+
+    wire vsync_pi;
+    wire hsync_pi;
+    wire displayEnable_pi;
+
+    assign red_pi[5:0] = pi_gpio[21:16]; // Red
+    assign green_pi[5:0] = pi_gpio[15:10]; // Green
+    assign blue_pi[5:0] = pi_gpio[9:4]; // Blue 
+
+    assign vsync_pi = pi_gpio[2];
+    assign hsync_pi = pi_gpio[3];
+    assign pixelClock_pi = pi_gpio[0];
+    assign displayEnable_pi = pi_gpio[1];
+
+    // -----------------------------------------------------------
+    // Track the frame line and dot from the Pi
+    wire [9:0] pixelX_pi;
+    wire [9:0] pixelY_pi;
+    wire isFieldOdd_pi;
+
+    pi_tracker pi_tracker0 (
+        // Inputs
+        .pixelClockX6(sysClk),
+        .pixelClockPhase(sysClkPhase),
+        .nReset(nReset),
+        .hsync_pi(hsync_pi),
+        .vsync_pi(vsync_pi),
+        .displayEnabled_pi(displayEnable_pi),
+
+        // Outputs
+        .fieldLineDot_pi(pixelX_pi),
+        .frameLine_pi(pixelY_pi),
+        .isFieldOdd_pi(isFieldOdd_pi)
+    );
+
+    // -----------------------------------------------------------
+    // Syncronize the incoming AIV async signals to the Pi's pixel clock
     // This is done using a 2-stage synchronizer to avoid metastability
     // issues.
     wire aiv_redIn_sync;
@@ -141,9 +179,9 @@ module top(
 
     // -----------------------------------------------------------
     // PAL 576i hsync/vsync regeneration from incoming AIV composite sync
-    wire hsync;
-    wire vsync;
-    wire isFieldOdd;
+    wire hsync_aiv;
+    wire vsync_aiv;
+    wire isFieldOdd_aiv;
 
     sync_regenerator_pal576i sync_regenerator_pal576i0 (
         // Inputs
@@ -151,9 +189,9 @@ module top(
         .csync(aiv_csyncIn_sync),
 
         // Outputs
-        .hsync(hsync),
-        .vsync(vsync),
-        .isFieldOdd(isFieldOdd)
+        .hsync(hsync_aiv),
+        .vsync(vsync_aiv),
+        .isFieldOdd(isFieldOdd_aiv)
     );
 
     // -----------------------------------------------------------
@@ -162,13 +200,13 @@ module top(
     wire [9:0] pixelY_aiv;
     wire displayEnable_aiv; // Active high when in the active display area
 
-    active_frame_tracker active_frame_tracker0 (
+    aiv_active_frame_tracker aiv_active_frame_tracker0 (
         // Inputs
         .clk(sysClk),
         .nReset(nReset),
-        .hsync(hsync),
-        .vsync(vsync),
-        .isFieldOdd(isFieldOdd),
+        .hsync(hsync_aiv),
+        .vsync(vsync_aiv),
+        .isFieldOdd(isFieldOdd_aiv),
 
         // Outputs
         .active_frame_dot(pixelX_aiv),
@@ -197,55 +235,109 @@ module top(
     );
 
     // -----------------------------------------------------------
-    // Mix the test card and AIV RGB111 signals together
-    wire redOut;
-    wire greenOut;
-    wire blueOut;
+    // Frame buffer for the RGB111 signals
 
-    videomixer videomixer0 (
+    wire redOut_aivfb;
+    wire greenOut_aivfb;
+    wire blueOut_aivfb;
+
+    wire [2:0] rgb111_in;
+    //assign rgb111_in = {redOut_tc, greenOut_tc, blueOut_tc};
+    assign rgb111_in = {aiv_redIn_sync, aiv_greenIn_sync, aiv_blueIn_sync};
+    wire [2:0] rgb111_out;
+    assign {redOut_aivfb, greenOut_aivfb, blueOut_aivfb} = rgb111_out;
+
+    wire startOfFrame_pi;
+    assign startOfFrame_pi = (pixelY_pi == 0) && (pixelX_pi == 0) && (displayEnable_pi == 1);
+
+    wire startOfFrame_aiv;
+    assign startOfFrame_aiv = (pixelY_aiv == 0) && (pixelX_aiv == 0) && (displayEnable_aiv == 1);
+
+    framebuffer framebuffer0 (
         // Inputs
         .clk(sysClk),
-        .nReset(nReset),
+        .clkPhase(sysClkPhase),
+        .reset_n(nReset),
 
-        .redIn1(redOut_tc),
-        .greenIn1(greenOut_tc),
-        .blueIn1(blueOut_tc),
+        .reset_in(startOfFrame_aiv),
+        .reset_out(startOfFrame_pi),
 
-        .redIn0(aiv_redIn_sync),
-        .greenIn0(aiv_greenIn_sync),
-        .blueIn0(aiv_blueIn_sync),
+        //.reset_in(1'b0),
+        //.reset_out(1'b0),
+
+        .data_in_en(displayEnable_aiv),
+        .data_out_en(displayEnable_pi),
+
+        .data_in(rgb111_in),
 
         // Outputs
-        .redOut(redOut),
-        .greenOut(greenOut),
-        .blueOut(blueOut)
+        .data_out(rgb111_out),
+        
+        // SRAM interface signals
+        .sram_addr(SRAM0_A),
+        .sram_data(SRAM0_D),
+        .sram_ce_n(SRAM0_nCS),
+        .sram_oe_n(SRAM0_nOE),
+        .sram_we_n(SRAM0_nWE)
     );
 
     // -----------------------------------------------------------
-    // Convert the test card RGB111 to RGB666 and output to SCART
+    // Convert the RGB111 output to RGB666 and output to SCART
+    wire [5:0] redOut_aivfb_666;
+    wire [5:0] greenOut_aivfb_666;
+    wire [5:0] blueOut_aivfb_666;
+
     rgb111to666 rgb111to6660 (
         // Inputs
         .clk(sysClk),
-        .red_in(redOut),
-        .green_in(greenOut),
-        .blue_in(blueOut),
+        .red_in(redOut_aivfb),
+        .green_in(greenOut_aivfb),
+        .blue_in(blueOut_aivfb),
 
         // Outputs
-        .red_out(red_scartOut),
-        .green_out(green_scartOut),
-        .blue_out(blue_scartOut),
+        .red_out(redOut_aivfb_666),
+        .green_out(greenOut_aivfb_666),
+        .blue_out(blueOut_aivfb_666),
     );
 
     // -----------------------------------------------------------
     // Generate the composite sync signal for the SCART output
+    // locked to the Pi5 video
     csyncgenerator csyncgenerator0 (
         // Inputs
         .clk(sysClk),
-        .hsync(hsync),
-        .vsync(vsync),
+        .hsync(hsync_pi),
+        .vsync(vsync_pi),
 
         // Outputs
         .csync(csync_scartOut)
+    );
+
+    // -----------------------------------------------------------
+    // Video mixer (RGB666)
+    videomixer videomixer0 (
+        .pixelClockX6(sysClk),
+        .pixelClockPhase(sysClkPhase),
+        .nReset(nReset),
+
+        // The AIV video is the foreground
+        .red_fg(redOut_aivfb_666),
+        .green_fg(greenOut_aivfb_666),
+        .blue_fg(blueOut_aivfb_666),
+
+        // The Pi video is the background
+        .red_bg(red_pi),
+        .green_bg(green_pi),
+        .blue_bg(blue_pi),
+
+        // .red_bg(6'b0),
+        // .green_bg(6'b0),
+        // .blue_bg(6'b0),
+
+        // Video output
+        .red_out(red_scartOut),
+        .green_out(green_scartOut),
+        .blue_out(blue_scartOut)
     );
 
     // -----------------------------------------------------------

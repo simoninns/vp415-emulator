@@ -43,26 +43,31 @@ module csyncgenerator(
     output wire csync	// composite sync output
 );
 
-    // Generate the hsync and vsync and then XOR them
-    // to create the composite sync signal
-    wire hsync_out;
-    wire vsync_out;
+    assign csync = hsync ~^ vsync;
 
-    // Generate the hsync pulse
-    hsync_pulse_generator hsync_gen (
-        .clk(clk),
-        .hsync_pulse(hsync),
-        .hsync_out(hsync_out)
-    );
-    // Generate the vsync pulse
-    vsync_pulse_generator vsync_gen (
-        .clk(clk),
-        .vsync_pulse(vsync),
-        .vsync_out(vsync_out)
-    );
-    // Combine the hsync and vsync signals and invert
-    // to create the composite sync signal
-    assign csync = ~(hsync_out ^ vsync_out);
+    // The rest of this is only if you need to do the same thing with 
+    // the AIV
+
+    // // Generate the hsync and vsync and then XOR them
+    // // to create the composite sync signal
+    // wire hsync_out;
+    // wire vsync_out;
+
+    // // Generate the hsync pulse
+    // hsync_pulse_generator hsync_gen (
+    //     .clk(clk),
+    //     .hsync_pulse(hsync),
+    //     .hsync_out(hsync_out)
+    // );
+    // // Generate the vsync pulse
+    // vsync_pulse_generator vsync_gen (
+    //     .clk(clk),
+    //     .vsync_pulse(vsync),
+    //     .vsync_out(vsync_out)
+    // );
+    // // Combine the hsync and vsync signals and invert
+    // // to create the composite sync signal
+    // assign csync = ~(hsync_out ^ vsync_out);
 endmodule
 
 module hsync_pulse_generator (

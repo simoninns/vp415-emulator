@@ -30,23 +30,6 @@
 
 // Note: This module is used to generate a system clock that is in phase
 // with the incoming pixel clock.  The incoming pixel clock is multiplied
-// by 10 to provide a system clock that is 10 times faster.  The module
-// also provides a /10 enable signal that is used to generate a 1 clock
-// wide pulse every 10 system clocks.  This is used to generate a phase
-// signal that is in phase with the original incoming pixel clock.
-
-// Inbound pixel clock is: 13.500 MHz (x10 = 135.000 MHz)
-//
-// PLL configuration:
-// Given input frequency:         13.500 MHz
-// Requested output frequency:    135.000 MHz
-// Achieved output frequency:     135.000 MHz
-//
-// 135.000 provides a 7.41 ns clock period
-// pixelClockX1_en provides a /10 enable pulse (i.e. at 13.500 MHz)
-
-// Note: This module is used to generate a system clock that is in phase
-// with the incoming pixel clock.  The incoming pixel clock is multiplied
 // by 6 to provide a system clock that is 6 times faster.  The module
 // also provides a /6 enable signal that is used to generate a 1 clock
 // wide pulse every 6 system clocks.  This is used to generate a phase
@@ -66,7 +49,7 @@ module pipixelclockpll(
 	input pixelClockIn,
 	
 	output pixelClockX6_out,
-	output pixelClockX1_en
+	output [2:0] pixelClockPhase,
 	);
 
 	// Input pixel clock x6
@@ -86,18 +69,19 @@ module pipixelclockpll(
 	);
 
 	// Count the clock phases (since the pixel clock is x6)
-	reg [2:0] currentPhase_r;
-	assign pixelClockX1_en = (currentPhase_r == 3'b011) ? 1'b1 : 1'b0;
+	reg [2:0] pixelClockPhase_r;
 
 	initial begin
-		currentPhase_r <= 3'b000;
+		pixelClockPhase_r <= 3'b000;
 	end
 
 	always @(posedge pixelClockX6_out) begin
-		currentPhase_r <= currentPhase_r + 3'b001;
-		if (currentPhase_r == 3'b101) begin
-			currentPhase_r <= 3'b000;
+		pixelClockPhase_r <= pixelClockPhase_r + 3'b001;
+		if (pixelClockPhase_r == 3'b101) begin
+			pixelClockPhase_r <= 3'b000;
 		end
 	end
+
+	assign pixelClockPhase = pixelClockPhase_r;
 
 endmodule

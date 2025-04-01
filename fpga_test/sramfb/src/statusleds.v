@@ -29,36 +29,22 @@
 `default_nettype none
 
 // Flash two LEDs on and off to show the FPGA is running
-module statusleds(
-    input nReset,
+module statusleds (
+    // Inputs
     input sysClock,
-
-    output [1:0] leds
+    input nReset,
+    input [1:0] test_result,  // Added test result input
+    
+    // Outputs
+    output reg [1:0] leds
 );
 
-    // Delay counter for PWM
-    reg [25:0] cnt;
-    always @(posedge sysClock, negedge nReset) begin
+    always @(posedge sysClock or negedge nReset) begin
         if (!nReset) begin
-            cnt <= 26'b0000000000000000000000000;
+            leds <= 2'b00;
         end else begin
-            cnt <= cnt+1;
+            leds <= test_result;  // Show test results on LEDs
         end
     end
-
-    // Ramp up and down the intensity
-    reg [4:0] pwm;
-    wire [3:0] intensity = cnt[25] ? cnt[24:21] : ~cnt[24:21];
-    always @(posedge sysClock, negedge nReset) begin
-        if (!nReset) begin
-            pwm <= 5'b00000;
-        end else begin
-            pwm <= pwm[3:0] + intensity;
-        end
-    end
-
-    // Drive the LEDs
-    assign leds[0] = pwm[4];
-    assign leds[1] = 5'b11111 - pwm[4];
 
 endmodule

@@ -45,8 +45,6 @@ module testcard1bit(
     // 720 active pixels per line. So we will output 8 bars of 
     // 90 pixels of red, green, blue and black repeated twice.
 
-    // The test card is 720 pixels wide and 288 lines high.
-
     reg redOut_r;
     reg greenOut_r;
     reg blueOut_r;
