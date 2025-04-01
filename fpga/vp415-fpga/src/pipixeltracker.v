@@ -150,19 +150,19 @@ module pi_fieldTracker (
         else begin
             if (pixelClockPhase == 3'b0) begin
                 // On the falling edge of the vSync sample the hSync
-                // If hSync is high then we are in the even field and evenFieldSync is held high until the rising edge of the vSync
-                // If hSync is low then we are in the odd field and oddFieldSync is held high until the rising edge of the vSync
+                // If hSync is high then we are in the odd field and oddFieldSync is held high until the rising edge of the vSync
+                // If hSync is low then we are in the even field and evenFieldSync is held high until the rising edge of the vSync
 
                 // Detect the falling edge of the vSync
                 if (vSync == 0 && prevVSync_r == 1) begin
                     // Sample the hSync
                     if (hSync == 1) begin
-                        // Even field
-                        isFieldOdd_r <= 0;
-                    end
-                    else begin
                         // Odd field
                         isFieldOdd_r <= 1;
+                    end
+                    else begin
+                        // Even field
+                        isFieldOdd_r <= 0;
                     end
                     prevVSync_r <= 0;
                 end

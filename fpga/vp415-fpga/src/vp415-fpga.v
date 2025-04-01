@@ -262,9 +262,6 @@ module top(
         .reset_in(startOfFrame_aiv),
         .reset_out(startOfFrame_pi),
 
-        //.reset_in(1'b0),
-        //.reset_out(1'b0),
-
         .data_in_en(displayEnable_aiv),
         .data_out_en(displayEnable_pi),
 
@@ -315,6 +312,10 @@ module top(
 
     // -----------------------------------------------------------
     // Video mixer (RGB666)
+    wire [5:0] redOut;
+    wire [5:0] greenOut;
+    wire [5:0] blueOut;
+
     videomixer videomixer0 (
         .pixelClockX6(sysClk),
         .pixelClockPhase(sysClkPhase),
@@ -335,10 +336,16 @@ module top(
         // .blue_bg(6'b0),
 
         // Video output
-        .red_out(red_scartOut),
-        .green_out(green_scartOut),
-        .blue_out(blue_scartOut)
+        .red_out(redOut),
+        .green_out(greenOut),
+        .blue_out(blueOut)
     );
+
+    // -----------------------------------------------------------
+    // SCART output (ensures output is blanked when not in the active area)
+    assign red_scartOut = redOut & {6{displayEnable_pi}};
+    assign green_scartOut = greenOut & {6{displayEnable_pi}};
+    assign blue_scartOut = blueOut & {6{displayEnable_pi}};
 
     // -----------------------------------------------------------
     // nReset signal generation (as the iCE40 board doesn't have one)
