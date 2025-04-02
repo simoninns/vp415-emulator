@@ -36,9 +36,8 @@ module aivvideo (
     input [2:0] rgb_111,
     input csync,
 
-    input [9:0] pixelX_pi,
-    input [9:0] pixelY_pi,
-    input displayEnable_pi,
+    input pi_startOfFrame,
+    input pi_activeVideo,
 
     // SRAM interface
     output [17:0] SRAM0_A,
@@ -105,35 +104,12 @@ module aivvideo (
         .display_enable(displayEnable_aiv)
     );
 
-    // // -----------------------------------------------------------
-    // // Generate a RGB111 test card
-    // wire redOut_tc;
-    // wire greenOut_tc;
-    // wire blueOut_tc;
-
-    // testcard1bit testcard1bit0 (
-    //     // Inputs
-    //     .clk(sysClk),
-    //     .nReset(nReset),
-    //     .pixelX(pixelX_aiv),
-    //     .pixelY(pixelY_aiv),
-    //     .displayEnable(displayEnable_aiv),
-
-    //     // Outputs
-    //     .redOut(redOut_tc),
-    //     .greenOut(greenOut_tc),
-    //     .blueOut(blueOut_tc)
-    // );
-
     // -----------------------------------------------------------
     // Frame buffer for the RGB111 signals
-    wire startOfFrame_pi;
-    assign startOfFrame_pi = (pixelY_pi == 0) && (pixelX_pi == 0) && (displayEnable_pi == 1);
-
     wire startOfFrame_aiv;
     assign startOfFrame_aiv = (pixelY_aiv == 0) && (pixelX_aiv == 0) && (displayEnable_aiv == 1);
 
-    wire [2:0] rgb_111_fb;
+    wire [2:0] rgb_fb_111;
 
     framebuffer framebuffer0 (
         // Inputs
@@ -142,15 +118,15 @@ module aivvideo (
         .reset_n(nReset),
 
         .reset_in(startOfFrame_aiv),
-        .reset_out(startOfFrame_pi),
+        .reset_out(pi_startOfFrame),
 
         .data_in_en(displayEnable_aiv),
-        .data_out_en(displayEnable_pi),
+        .data_out_en(pi_activeVideo),
 
         .data_in(rgb_sync_111),
 
         // Outputs
-        .data_out(rgb_111_fb),
+        .data_out(rgb_fb_111),
         
         // SRAM interface signals
         .sram_addr(SRAM0_A),
@@ -165,7 +141,7 @@ module aivvideo (
     rgb111to666 rgb111to6660 (
         // Inputs
         .clk(sysClk),
-        .rgb_111(rgb_111_fb),
+        .rgb_111(rgb_fb_111),
 
         // Outputs
         .rgb_666(rgb_666)
