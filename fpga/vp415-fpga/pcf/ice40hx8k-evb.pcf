@@ -52,28 +52,29 @@ set_io -nowarn SRAM0_D[14] T15
 set_io -nowarn SRAM0_D[15] T14
 
 ## GPIO1 (34 pin right-angle IDC)
-## SCART RGB666 Dev Adaptor with RGB 3-bit input
-set_io -nowarn red_scartOut[0] E4
-set_io -nowarn red_scartOut[1] B2
-set_io -nowarn red_scartOut[2] F5
-set_io -nowarn red_scartOut[3] B1
-set_io -nowarn red_scartOut[4] C1
-set_io -nowarn red_scartOut[5] C2
+## SCART RGB666
+set_io -nowarn rgb_scart_666[12] E4 # Red LSB
+set_io -nowarn rgb_scart_666[13] B2
+set_io -nowarn rgb_scart_666[14] F5
+set_io -nowarn rgb_scart_666[15] B1
+set_io -nowarn rgb_scart_666[16] C1
+set_io -nowarn rgb_scart_666[17] C2 # Red MSB
 
-set_io -nowarn green_scartOut[0] F4
-set_io -nowarn green_scartOut[1] D2
-set_io -nowarn green_scartOut[2] G5
-set_io -nowarn green_scartOut[3] D1
-set_io -nowarn green_scartOut[4] G4
-set_io -nowarn green_scartOut[5] E3
+set_io -nowarn rgb_scart_666[6] F4 # Green LSB
+set_io -nowarn rgb_scart_666[7] D2
+set_io -nowarn rgb_scart_666[8] G5
+set_io -nowarn rgb_scart_666[9] D1
+set_io -nowarn rgb_scart_666[10] G4
+set_io -nowarn rgb_scart_666[11] E3 # Green MSB
 
-set_io -nowarn blue_scartOut[0] J2
-set_io -nowarn blue_scartOut[1] H1
-set_io -nowarn blue_scartOut[2] G1
-set_io -nowarn blue_scartOut[3] J5
-set_io -nowarn blue_scartOut[4] H2
-set_io -nowarn blue_scartOut[5] J4
-set_io -nowarn csync_scartOut H5
+set_io -nowarn rgb_scart_666[0] J2 # Blue LSB
+set_io -nowarn rgb_scart_666[1] H1
+set_io -nowarn rgb_scart_666[2] G1
+set_io -nowarn rgb_scart_666[3] J5
+set_io -nowarn rgb_scart_666[4] H2
+set_io -nowarn rgb_scart_666[5] J4 # Blue MSB
+
+set_io -nowarn csync_scart H5
 
 set_io -nowarn gpio1_22 G2
 set_io -nowarn gpio1_24 H4
@@ -86,10 +87,10 @@ set_io -nowarn gpio1_33 G3
 set_io -nowarn gpio1_34 F3
 
 ## EXT2 Temp TTL RGB in
-set_io -nowarn aiv_redIn B6
-set_io -nowarn aiv_greenIn C6
-set_io -nowarn aiv_blueIn D7
-set_io -nowarn aiv_csyncIn A6
+set_io -nowarn rgb_aiv_111[2] B6 # Red
+set_io -nowarn rgb_aiv_111[1] C6 # Green
+set_io -nowarn rgb_aiv_111[0] D7 # Blue
+set_io -nowarn aiv_csync A6
 # set_io -nowarn aiv_vsyncIn D6
 # set_io -nowarn aiv_csyncIn A5
 

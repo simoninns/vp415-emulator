@@ -30,16 +30,22 @@
 
 module sync_signals (
     input wire clk,          // 81 MHz clock
-    input wire red,
-    input wire green,
-    input wire blue,
+    input wire [2:0] rgb_111,
     input wire csync,
 
-    output wire red_sync,
-    output wire green_sync,
-    output wire blue_sync,
+    output wire [2:0] rgb_sync_111,
     output wire csync_sync
 );
+
+    wire red;
+    wire green;
+    wire blue;
+    wire red_sync;
+    wire green_sync;
+    wire blue_sync;
+
+    assign {red, green, blue} = rgb_111;
+    assign rgb_sync_111 = {red_sync, green_sync, blue_sync};
 
     // Synchronize the async signals to the 81 MHz clock
     sync2 sync_red (

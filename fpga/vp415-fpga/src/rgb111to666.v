@@ -30,31 +30,27 @@
 
 module rgb111to666 (
     input wire clk,          // 81 MHz clock
-    input wire red_in,
-    input wire green_in,
-    input wire blue_in,
+    input wire [2:0] rgb_111,
 
-    output reg [5:0] red_out,
-    output reg [5:0] green_out,
-    output reg [5:0] blue_out
+    output reg [17:0] rgb_666
 );
 
     // Convert RGB111 to RGB666
     always @(posedge clk) begin
-        if (red_in) begin
-            red_out <= 6'b111111;
+        if (rgb_111[2]) begin
+            rgb_666[17:12] <= 6'b111111;
         end else begin
-            red_out <= 6'b000000;
+            rgb_666[17:12] <= 6'b000000;
         end
-        if (green_in) begin
-            green_out <= 6'b111111;
+        if (rgb_111[1]) begin
+            rgb_666[11:6] <= 6'b111111;
         end else begin
-            green_out <= 6'b000000;
+            rgb_666[11:6] <= 6'b000000;
         end
-        if (blue_in) begin
-            blue_out <= 6'b111111;
+        if (rgb_111[0]) begin
+            rgb_666[5:0] <= 6'b111111;
         end else begin
-            blue_out <= 6'b000000;
+            rgb_666[5:0] <= 6'b000000;
         end
     end
 

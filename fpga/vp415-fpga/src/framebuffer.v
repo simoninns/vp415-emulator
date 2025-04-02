@@ -40,10 +40,10 @@ module framebuffer (
     input wire data_out_en,
 
     input wire [2:0] data_in,      // 3-bit RGB111 input to framebuffer
-    output wire [2:0] data_out,     // 3-bit RGB111 output from framebuffer (changed from reg to wire)
+    output wire [2:0] data_out,     // 3-bit RGB111 output from framebuffer
     
     // SRAM interface signals
-    output reg [17:0] sram_addr,    // SRAM address bus (18 bits to match top-level)
+    output reg [17:0] sram_addr,    // SRAM address bus (18 bits)
     inout wire [15:0] sram_data,    // SRAM data bus (16 bits)
     output reg sram_ce_n,           // Chip enable (active low)
     output reg sram_oe_n,           // Output enable (active low)

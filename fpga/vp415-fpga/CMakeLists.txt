@@ -13,6 +13,8 @@ set(SRC_MODULES
     ${VERILOG_SRC_DIR}/${TARGET_NAME}.v
     ${VERILOG_SRC_DIR}/nreset.v
     ${VERILOG_SRC_DIR}/statusleds.v
+    ${VERILOG_SRC_DIR}/pivideo.v
+    ${VERILOG_SRC_DIR}/aivvideo.v
     ${VERILOG_SRC_DIR}/pipixelclk.v
     ${VERILOG_SRC_DIR}/syncsignals.v
     ${VERILOG_SRC_DIR}/framebuffer.v

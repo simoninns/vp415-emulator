@@ -33,51 +33,34 @@ module videomixer(
     input [2:0] pixelClockPhase,
     input nReset,
 
-    input [5:0] red_fg,
-    input [5:0] green_fg,
-    input [5:0] blue_fg,
+    input [17:0] rgb_fg,
+    input [17:0] rgb_bg,
 
-    input [5:0] red_bg,
-    input [5:0] green_bg,
-    input [5:0] blue_bg,
-
-    output [5:0] red_out,
-    output [5:0] green_out,
-    output [5:0] blue_out
+    output [17:0] rgb_out
 	);
 
-    reg [5:0] red_out_r;
-    reg [5:0] green_out_r;
-    reg [5:0] blue_out_r;
+    reg [17:0] rgb_out_r;
 
     always @(posedge pixelClockX6, negedge nReset) begin
         if (!nReset) begin
             // Reset
-            red_out_r <= 6'b000000;
-            green_out_r <= 6'b000000;
-            blue_out_r <= 6'b000000;
+            rgb_out_r <= 18'b0;
         end
         else begin
             if (pixelClockPhase == 3'b0) begin
                 // If the foreground pixel is black, use the background pixel
-                if (red_fg == 6'b0 && green_fg == 6'b0 && blue_fg == 6'b0) begin
-                    red_out_r <= red_bg;
-                    green_out_r <= green_bg;
-                    blue_out_r <= blue_bg;
+                if (rgb_fg == 18'b0) begin
+                    rgb_out_r <= rgb_bg;
                 end
                 else begin
                     // Otherwise, use the foreground pixel
-                    red_out_r <= red_fg;
-                    green_out_r <= green_fg;
-                    blue_out_r <= blue_fg;
+                    rgb_out_r <= rgb_fg;
                 end
             end
         end
     end
 
     // Assign the output signals
-    assign red_out = red_out_r;
-    assign green_out = green_out_r;
-    assign blue_out = blue_out_r;
+    assign rgb_out = rgb_out_r;
 
 endmodule
