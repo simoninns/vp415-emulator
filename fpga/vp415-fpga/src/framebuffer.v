@@ -28,19 +28,20 @@
 // Disable Verilog implicit definitions
 `default_nettype none
 
-module framebuffer (
+module framebuffer(
     input wire clk,                 // System clock
     input wire [2:0] clkPhase,      // Clock phase input
     input wire reset_n,             // Active low reset
 
-    input wire reset_in,
-    input wire reset_out,
+    input display_en_in,            // Display enable input
+    input frame_start_flag_in,      // Input frame start flag
 
-    input wire data_in_en,
-    input wire data_out_en,
+    input display_en_out,           // Display enable output
+    input frame_start_flag_out,     // Output frame start flag
 
-    input wire [2:0] data_in,      // 3-bit RGB111 input to framebuffer
-    output wire [2:0] data_out,     // 3-bit RGB111 output from framebuffer
+    input wire [2:0] rgb_111_in,    // 3-bit RGB111 input to framebuffer
+    output wire [2:0] rgb_111_out,  // 3-bit RGB111 output from framebuffer
+
     
     // SRAM interface signals
     output reg [17:0] sram_addr,    // SRAM address bus (18 bits)
@@ -65,213 +66,229 @@ module framebuffer (
     );
 
     // Phases for the state machine
-    //
-    // Note: We are dealing with pixels and the pixel clock is 13.5 MHz
-    // The pixel clock is multiplied by 6 to get the system clock which
-    // gives us 6 phases per pixel clock cycle to perform operations.
-    localparam STATE_PHASE0 = 3'd0;
-    localparam STATE_PHASE1 = 3'd1;
-    localparam STATE_PHASE2 = 3'd2;
-    localparam STATE_PHASE3 = 3'd3;
-    localparam STATE_PHASE4 = 3'd4;
-    localparam STATE_PHASE5 = 3'd5;
+    localparam STATE_READ0 = 3'd3;
+    localparam STATE_READ1 = 3'd4;
+    localparam STATE_READ2 = 3'd5;
+    localparam STATE_WRITE0 = 3'd0;
+    localparam STATE_WRITE1 = 3'd1;
+    localparam STATE_WRITE2 = 3'd2;
 
-    // Define the buffer size
-    // Note: Each buffer word stores 5 pixels
-    //
-    // 720 pixels * 576 lines = 414720 pixels
-    // 414720 pixels / 5 pixels per word = 82944 words
-    localparam BUFFER_SIZE = 82944;
+    // Framebuffer input buffers
+    reg [15:0] input_buffer0;
+    reg [15:0] input_buffer1;
+    reg input_buffer_current;
+    reg [17:0] input_framebuffer_addr;
+    reg [2:0] input_pixel_counter;
 
-    // Registers
-    reg [2:0] data_in_pos_r; // Data in position register
-    reg [2:0] data_out_pos_r; // Data out position register
+    // Frame buffer output buffer
+    reg [15:0] output_buffer0;
+    reg [15:0] output_buffer1;
+    reg output_buffer_current;
+    reg [17:0] output_framebuffer_addr;
+    reg [2:0] output_pixel_counter;
 
-    reg [2:0] data_out_r; // Data out register
+    reg [15:0] test_buffer;
 
-    reg data_in_ready; // Flag to indicate if data is ready to be read
-    reg data_out_ready; // Flag to indicate if data is ready to be written
+    reg [2:0] rgb_111_out_r;
+    assign rgb_111_out = rgb_111_out_r;
 
-    reg [15:0] buffer_in_r;    // Buffer to hold the packed 16-bit input data
-    reg [15:0] buffer_out_r;   // Buffer to hold the packed 16-bit output data
+    // Test only
+    localparam ADDR_PER_LINE = 720 / 5; // Number of addresses per line (720 pixels / 5 pixels per address)
 
-    reg [17:0] current_write_addr; // Current write address
-    reg [17:0] current_read_addr;  // Current read address
-
-    reg data_out_en_r; // Data out enable register
-    reg data_in_en_r;  // Data in enable register
-
-    // State machine
+    // Input processing
     always @(posedge clk or negedge reset_n) begin
         if (!reset_n) begin
-            // Reset buffers
-            buffer_in_r <= 16'd0;
-            buffer_out_r <= 16'd0;
+            // Reset input state
+            input_buffer0 <= 16'b0;
+            input_buffer1 <= 16'b0;
+            input_buffer_current <= 1'b0;
+            input_framebuffer_addr <= 18'b0;
+            input_pixel_counter <= 3'b0;
 
-            data_in_pos_r <= 3'd0;
-            data_out_pos_r <= 3'd0;
+            // Reset output state
+            output_buffer0 <= 16'b0;
+            output_buffer1 <= 16'b0;
+            output_buffer_current <= 1'b0;
+            output_framebuffer_addr <= 18'b0;
+            output_pixel_counter <= 3'b0;
+            rgb_111_out_r <= 3'b0;
 
-            data_out_r <= 3'd0; // Reset output data
+            sram_ce_n <= 1'b1; // Deactivate SRAM
+            sram_oe_n <= 1'b1; // Deactivate output
+            sram_we_n <= 1'b1; // Deactivate write
 
-            data_in_ready <= 1'b0; // Reset data ready flag
-            data_out_ready <= 1'b0; // Reset data out ready flag
+            sram_ce_n <= 1'b0; // Activate SRAM via Chip Enable
+        end else begin
+            // ----------------------------------------------------------------------------------
+            // SRAM address reset handling
+            // Input address reset?
+            if (frame_start_flag_in) begin
+                // Reset input state
+                input_buffer0 <= 16'd0;
+                input_buffer1 <= 16'd0;
+                input_buffer_current <= 1'd0;
+                input_framebuffer_addr <= 18'd0;
+                input_pixel_counter <= 3'd0;
+            end
 
-            data_out_en_r <= 1'b0; // Reset data out enable
-            data_in_en_r <= 1'b0;  // Reset data in enable
+            // Output address reset?
+            if (frame_start_flag_out) begin
+                // Reset output state
+                output_buffer0 <= 16'd0;
+                output_buffer1 <= 16'd0;
+                output_buffer_current <= 1'd0;
+                output_framebuffer_addr <= 18'd0;
+                output_pixel_counter <= 3'd0;
 
-            // Reset address counters
-            current_write_addr <= 18'd0;
-            current_read_addr <= 18'd0;
-            
-            // Set SRAM control signals to idle
-            sram_addr <= 18'd0;
-            sram_data_out_en <= 1'b0;  // Disable data output
-            sram_oe_n <= 1'b1;         // Disabled
-            sram_we_n <= 1'b1;         // Disabled
+                rgb_111_out_r <= 3'd0;
+            end
 
-            // As we only have one SRAM chip, we can keep it enabled
-            sram_ce_n <= 1'b0; // Enable chip
-        end
-        else begin
-            case (clkPhase)
-                STATE_PHASE0: begin
-                    // Phase zero - Getting and setting data from our interface
-
-                    // Pack the 3 bits of data from data_in into the 16-bit buffer_in_r 
-                    // at the correct position based on data_in_pos_r
-                    buffer_in_r[data_in_pos_r * 3 +: 3] <= data_in; 
-
-                    // Unpack the 3 bits of data from buffer_out_r to data_out_r
-                    data_out_r <= buffer_out_r[data_out_pos_r * 3 +: 3];
-
-                    // Read the enable flags
-                    data_out_en_r <= data_out_en;
-                    data_in_en_r <= data_in_en;
-
-                    // Do we have 5 pixels in the input buffer?
-                    if (data_in_pos_r == 3'd4) begin
-                        data_in_pos_r <= 3'd0;
-                        data_in_ready <= 1'b1;  // Mark buffer as ready for writint to SRAM
+            // ----------------------------------------------------------------------------------
+            // Pixel processing
+            if (clkPhase == 3'd0) begin
+                // Input display enabled?
+                if (display_en_in) begin
+                    // Store the current pixel data
+                    if (input_buffer_current) begin
+                        // Use input buffer 0 and write the 3 bits according to the pixel counter
+                        input_buffer0[input_pixel_counter * 3 +: 3] <= rgb_111_in;
                     end else begin
-                        if (data_in_en_r) data_in_pos_r <= data_in_pos_r + 1'b1;
-                        data_in_ready <= 1'b0;  // Clear the data ready flag
+                        // Use input buffer 1 and write the 3 bits according to the pixel counter
+                        input_buffer1[input_pixel_counter * 3 +: 3] <= rgb_111_in;
                     end
 
-                    // Have we output 5 pixels from the output buffer?
-                    if (data_out_pos_r == 3'd4) begin
-                        data_out_pos_r <= 3'd0;
-                        data_out_ready <= 1'b1; // Mark that we need new data from SRAM
-                    end else begin
-                        if (data_out_en_r) data_out_pos_r <= data_out_pos_r + 1'b1;
-                        data_out_ready <= 1'b0; // Clear the data out ready flag
-                    end
+                    // Increment the pixel counter
+                    input_pixel_counter <= input_pixel_counter + 3'd1;
 
-                    // Handle address pointer reset signals
-                    if (reset_in) begin
-                        current_write_addr <= 18'd0; // Reset write address
-                    end
-
-                    if (reset_out) begin
-                        current_read_addr <= 18'd0; // Reset read address
+                    // Check if we need to switch buffers
+                    if (input_pixel_counter == 3'd4) begin
+                        // Switch buffers
+                        input_buffer_current <= ~input_buffer_current;
+                        input_pixel_counter <= 3'b0; // Reset input pixel counter
                     end
                 end
 
-                STATE_PHASE1: begin
-                    // Phase one - Prepare to write data to SRAM
+                // Output display enabled?
+                if (display_en_out) begin
+                    // Get the current pixel data from the output buffer
+                    if (output_buffer_current) begin
+                        // Use output buffer 0 and read the 3 bits according to the pixel counter
+                        rgb_111_out_r <= output_buffer0[output_pixel_counter * 3 +: 3];
+                    end else begin
+                        // Use output buffer 1 and read the 3 bits according to the pixel counter
+                        rgb_111_out_r <= output_buffer1[output_pixel_counter * 3 +: 3];
+                    end
 
-                    // Check if data is ready to be written
-                    if (data_in_ready && data_in_en_r) begin
-                        // Set the unused 16th bit to zero (for clarity)
-                        buffer_in_r[15] <= 1'b0;
+                    // Increment the pixel counter
+                    output_pixel_counter <= output_pixel_counter + 3'd1;
+
+                    // Check if we need to switch buffers
+                    if (output_pixel_counter == 3'd4) begin
+                        // Switch buffers
+                        output_buffer_current <= ~output_buffer_current;
+                        output_pixel_counter <= 3'b0; // Reset input pixel counter
+                    end
+                end
+            end
+
+            // --------------------------------------------------------------------------------
+            // SRAM handling
+
+            // If no SRAM access is taking place, keep the SRAM in a idle state
+            if (output_pixel_counter != 1 && input_pixel_counter != 1) begin
+                sram_oe_n <= 1'b1; // Deactivate output
+                sram_we_n <= 1'b1; // Deactivate write
+                sram_data_out_en <= 1'b0; // Set data bus to input
+            end
+
+            // Only perform SRAM read once per 5 pixels
+            if (output_pixel_counter == 1 && display_en_out) begin
+                case (clkPhase)
+                    STATE_READ0: begin
+                        // SRAM access - read - set the address and enable the chip
+                        sram_addr <= output_framebuffer_addr;
+                        sram_oe_n <= 1'b0; // Activate output
+                        sram_we_n <= 1'b1; // Deactivate write
+                        sram_data_out_en <= 1'b0; // Set data bus to input
+                    end
+
+                    STATE_READ1: begin
+                        // SRAM READ wait for stable data
+                    end
+
+                    STATE_READ2: begin
+                        // SRAM access - read - get the data from the SRAM
+                        
+                        // // Make a test pattern
+                        // //if ((output_framebuffer_addr >= (ADDR_PER_LINE * 16'd30)) && (output_framebuffer_addr < (ADDR_PER_LINE * 16'd30) + ADDR_PER_LINE/2)) begin
+                        // if ((output_framebuffer_addr >= (ADDR_PER_LINE * 16'd0)) && (output_framebuffer_addr < (ADDR_PER_LINE * 16'd432))) begin
+
+                        //     test_buffer <= 16'b0000000000000111;
+                        // end else begin
+                        //     test_buffer <= 16'b0000000000000000; 
+                        // end
+
+                        // Use the currently inactive output buffer
+                        if (output_buffer_current) begin
+                            // Use output buffer 1
+                            output_buffer1 <= sram_data_in;
+                            //output_buffer1 <= test_buffer; // Use test pattern for debugging
+                        end else begin
+                            // Use output buffer 0
+                            output_buffer0 <= sram_data_in;
+                            //output_buffer0 <= test_buffer; // Use test pattern for debugging
+                        end
+
+                        // Increment the output framebuffer address
+                        output_framebuffer_addr <= output_framebuffer_addr + 1;
+                    end
+                endcase
+            end
+
+            // Only perform SRAM write once per 5 pixels
+            if (input_pixel_counter == 1 && display_en_in) begin
+                case (clkPhase)
+                    STATE_WRITE0: begin
+                        // Set the unused 16th bit to zero
+                        input_buffer0[15] <= 1'b0;
+                        input_buffer1[15] <= 1'b0;
 
                         // Prepare to write data to SRAM
                         sram_data_out_en <= 1'b1;
-                        sram_data_out <= buffer_in_r;
-                        sram_addr <= current_write_addr;
+
+                        if (input_buffer_current) begin
+                            // Use input buffer 1
+                            sram_data_out <= input_buffer1;
+                            // if (input_framebuffer_addr < 7200) sram_data_out <= 16'b0000000000000111;   
+                            // else sram_data_out <= 16'b0000000000000000; 
+                        end else begin
+                            // Use input buffer 0
+                            sram_data_out <= input_buffer0;
+                            // if (input_framebuffer_addr < 7200) sram_data_out <= 16'b0000000000000111;   
+                            // else sram_data_out <= 16'b0000000000000000; 
+                        end
+                        //sram_data_out <= 16'b0000000000000111;             
+                        
+                        sram_addr <= input_framebuffer_addr;
                         sram_we_n <= 1'b0; // Enable write
                         sram_oe_n <= 1'b1; // Disable output during write
-                    end else begin
-                        // Idle state
-                        sram_data_out_en <= 1'b0;
-                        sram_oe_n <= 1'b1;
-                        sram_we_n <= 1'b1;
                     end
-                end
 
-                STATE_PHASE2: begin
-                    // Phase two - Finalize write
+                    STATE_WRITE1: begin
+                        // SRAM WRITE wait for stable data
+                    end
 
-                    // Check if data is ready to be written
-                    if (data_in_ready && data_in_en_r) begin
+                    STATE_WRITE2: begin
                         sram_we_n <= 1'b1; // Disable write
                         sram_oe_n <= 1'b1; // Disable output
                         sram_data_out_en <= 1'b0; // Disable data output
-                        current_write_addr <= current_write_addr + 1'b1; // Increment write address
 
-                        // Range check the write address
-                        if (current_write_addr >= BUFFER_SIZE) begin
-                            current_write_addr <= 18'd0; // Reset to zero if overflow
-                        end
-
-                        // Clear the data ready flag
-                        data_in_ready <= 1'b0;
-                    end else begin
-                        // If not ready, disable data output and set SRAM control signals to idle
-                        sram_data_out_en <= 1'b0;
-                        sram_oe_n <= 1'b1; // Disable output
-                        sram_we_n <= 1'b1; // Disable write
+                        // Increment the input framebuffer address
+                        input_framebuffer_addr <= input_framebuffer_addr + 1;
                     end
-                end
-
-                STATE_PHASE3: begin
-                    // Phase three - Idle
-                end
-
-                STATE_PHASE4: begin
-                    // Phase four - Prepare to read data from SRAM
-
-                    // Check if data is ready to be read
-                    if (data_out_ready && data_out_en_r) begin
-                        sram_addr <= current_read_addr;
-                        sram_oe_n <= 1'b0; // Enable output
-                        sram_we_n <= 1'b1; // Disable write
-                        sram_data_out_en <= 1'b0; // Disable data output (we're reading)
-                    end else begin
-                        // Idle state
-                        sram_data_out_en <= 1'b0;
-                        sram_oe_n <= 1'b1;
-                        sram_we_n <= 1'b1;
-                    end
-                end
-
-                STATE_PHASE5: begin
-                    // Phase five - Finalize read
-
-                    // Check if data is ready to be read
-                    if (data_out_ready && data_out_en_r) begin
-                        buffer_out_r <= sram_data_in; // Capture the data from SRAM
-                        sram_oe_n <= 1'b1; // Disable output
-                        current_read_addr <= current_read_addr + 1'b1;
-
-                        // Range check the read address
-                        if (current_read_addr >= BUFFER_SIZE - 1) begin
-                            current_read_addr <= 18'd0;
-                        end
-
-                        // We've handled the read request
-                        data_out_ready <= 1'b0;
-                    end else begin
-                        // Idle state
-                        sram_data_out_en <= 1'b0;
-                        sram_oe_n <= 1'b1;
-                        sram_we_n <= 1'b1;
-                    end
-                end
-            endcase
+                endcase
+            end
         end
     end
-
-    // Output the data register to the output port
-    assign data_out = data_out_r;
 
 endmodule

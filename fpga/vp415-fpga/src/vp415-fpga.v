@@ -97,9 +97,6 @@ module top(
     // AIV video input signals
     wire [17:0] rgb_aiv_666;
 
-    wire startOfFrame_pi; // Signal to indicate the start of a new frame (frame, not field)
-    assign startOfFrame_pi = (pixelY_pi == 0) && (pixelX_pi == 0) && (displayEnable_pi == 1);
-
     aivvideo aivvideo0 (
         // Inputs
         .sysClk(sysClk),
@@ -110,9 +107,9 @@ module top(
         .rgb_111(rgb_aiv_111),
         .csync(aiv_csync),
 
-        // Pi video tracking signals (for framebuffer output sync)
-        .pi_startOfFrame(startOfFrame_pi),
-        .pi_activeVideo(displayEnable_pi),
+        .pixelX_pi(pixelX_pi),
+        .pixelY_pi(pixelY_pi),
+        .displayEnable_pi(displayEnable_pi),
 
         // SRAM interface
         .SRAM0_A(SRAM0_A),

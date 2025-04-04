@@ -35,85 +35,60 @@ module testcard1bit(
     input [9:0] pixelY,
     input displayEnable,
 
-    output redOut,
-    output greenOut,
-    output blueOut
+    output [2:0] rgb_111
 );
 
     // Generate an RGB111 test card.
-    // We have 4 possible outputs, red, green, blue and black and
     // 720 active pixels per line. So we will output 8 bars of 
-    // 90 pixels of red, green, blue and black repeated twice.
+    // 90 pixels.
 
-    reg redOut_r;
-    reg greenOut_r;
-    reg blueOut_r;
+    reg [2:0] rgb_111_r;
 
     always @(posedge clk, negedge nReset) begin
         if (!nReset) begin
-            redOut_r <= 1'b0;
-            greenOut_r <= 1'b0;
-            blueOut_r <= 1'b0;
+            rgb_111_r <= 3'b000;
         end else begin
             if (displayEnable) begin
                 if (pixelY < 288) begin
                     if (pixelX < (90 * 1)) begin
-                        // Red
-                        redOut_r <= 1'b1;
-                        greenOut_r <= 1'b0;
-                        blueOut_r <= 1'b0;
-                    end else if (pixelX < (90 * 2)) begin
-                        // Green
-                        redOut_r <= 1'b0;
-                        greenOut_r <= 1'b1;
-                        blueOut_r <= 1'b0;
-                    end else if (pixelX < (90 * 3)) begin
-                        // Blue
-                        redOut_r <= 1'b0;
-                        greenOut_r <= 1'b0;
-                        blueOut_r <= 1'b1;
-                    end else if (pixelX < (90 * 4)) begin
                         // Black
-                        redOut_r <= 1'b0;
-                        greenOut_r <= 1'b0;
-                        blueOut_r <= 1'b0;
+                        rgb_111_r <= 3'b000;
+                    end else if (pixelX < (90 * 2)) begin
+                        // Blue
+                        rgb_111_r <= 3'b001;
+                    end else if (pixelX < (90 * 3)) begin
+                        // Green
+                        rgb_111_r <= 3'b010;
+                    end else if (pixelX < (90 * 4)) begin
+                        // Cyan
+                        rgb_111_r <= 3'b011;
                     end else if (pixelX < (90 * 5)) begin
                         // Red
-                        redOut_r <= 1'b1;
-                        greenOut_r <= 1'b0;
-                        blueOut_r <= 1'b0;
+                        rgb_111_r <= 3'b100;
                     end else if (pixelX < (90 * 6)) begin
-                        // Green
-                        redOut_r <= 1'b0;
-                        greenOut_r <= 1'b1;
-                        blueOut_r <= 1'b0;
+                        // Magenta
+                        rgb_111_r <= 3'b101;
                     end else if (pixelX < (90 * 7)) begin
-                        // Blue
-                        redOut_r <= 1'b0;
-                        greenOut_r <= 1'b0;
-                        blueOut_r <= 1'b1;
+                        // Yellow
+                        rgb_111_r <= 3'b110;
+                    end else if (pixelX < (90 * 8)) begin
+                        // White
+                        rgb_111_r <= 3'b111;
                     end else begin
-                        redOut_r <= 1'b0;
-                        greenOut_r <= 1'b0;
-                        blueOut_r <= 1'b0;
+                        // Black
+                        rgb_111_r <= 3'b000;
                     end
                 end else begin
-                    redOut_r <= 1'b0;
-                    greenOut_r <= 1'b0;
-                    blueOut_r <= 1'b0;
+                    rgb_111_r <= 3'b000;
                 end
             end else begin
                 // Display not enabled, set all outputs to 0
-                redOut_r <= 1'b0;
-                greenOut_r <= 1'b0;
-                blueOut_r <= 1'b0;
+                rgb_111_r <= 3'b000;
             end
         end
     end
 
     // Connect internal registers to outputs
-    assign redOut = redOut_r;
-    assign greenOut = greenOut_r;
-    assign blueOut = blueOut_r;
+    assign rgb_111 = rgb_111_r;
 
 endmodule
