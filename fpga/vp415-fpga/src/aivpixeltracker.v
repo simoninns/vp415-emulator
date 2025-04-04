@@ -132,7 +132,7 @@ module aiv_active_dot_tracker (
 
     // Constants for active region
     localparam ACTIVE_H_START = 10'd72;  // Start of active horizontal region
-    localparam ACTIVE_H_END = ACTIVE_H_START + 10'd719;   // End of active horizontal region
+    localparam ACTIVE_H_END = ACTIVE_H_START + 10'd720;   // End of active horizontal region
 
     // Registers for tracking dots
     reg [9:0] dot_r;        // current dot in line (0-863)

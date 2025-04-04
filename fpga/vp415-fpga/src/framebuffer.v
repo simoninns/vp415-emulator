@@ -218,15 +218,6 @@ module framebuffer(
 
                     STATE_READ2: begin
                         // SRAM access - read - get the data from the SRAM
-                        
-                        // // Make a test pattern
-                        // //if ((output_framebuffer_addr >= (ADDR_PER_LINE * 16'd30)) && (output_framebuffer_addr < (ADDR_PER_LINE * 16'd30) + ADDR_PER_LINE/2)) begin
-                        // if ((output_framebuffer_addr >= (ADDR_PER_LINE * 16'd0)) && (output_framebuffer_addr < (ADDR_PER_LINE * 16'd432))) begin
-
-                        //     test_buffer <= 16'b0000000000000111;
-                        // end else begin
-                        //     test_buffer <= 16'b0000000000000000; 
-                        // end
 
                         // Use the currently inactive output buffer
                         if (output_buffer_current) begin
@@ -259,15 +250,10 @@ module framebuffer(
                         if (input_buffer_current) begin
                             // Use input buffer 1
                             sram_data_out <= input_buffer1;
-                            // if (input_framebuffer_addr < 7200) sram_data_out <= 16'b0000000000000111;   
-                            // else sram_data_out <= 16'b0000000000000000; 
                         end else begin
                             // Use input buffer 0
                             sram_data_out <= input_buffer0;
-                            // if (input_framebuffer_addr < 7200) sram_data_out <= 16'b0000000000000111;   
-                            // else sram_data_out <= 16'b0000000000000000; 
                         end
-                        //sram_data_out <= 16'b0000000000000111;             
                         
                         sram_addr <= input_framebuffer_addr;
                         sram_we_n <= 1'b0; // Enable write
