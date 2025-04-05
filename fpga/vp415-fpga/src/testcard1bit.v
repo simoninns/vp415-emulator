@@ -50,6 +50,7 @@ module testcard1bit(
         end else begin
             if (displayEnable) begin
                 if (pixelY < 288) begin
+                    // Colour bars for the top half of the screen
                     if (pixelX < (90 * 1)) begin
                         // Black
                         rgb_111_r <= 3'b000;
@@ -77,6 +78,14 @@ module testcard1bit(
                     end else begin
                         // Black
                         rgb_111_r <= 3'b000;
+                    end
+                end else if (pixelY < 576) begin
+
+                    // Draw a grid of while lines 20x20 pixels
+                    if ((pixelX % 20) == 0 || (pixelY % 20) == 0) begin
+                        rgb_111_r <= 3'b111; // White
+                    end else begin
+                        rgb_111_r <= 3'b000; // Black
                     end
                 end else begin
                     rgb_111_r <= 3'b000;
