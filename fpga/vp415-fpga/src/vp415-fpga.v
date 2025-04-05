@@ -90,12 +90,16 @@ module top(
         .csync(csync_scart),
 
         .pixelX(pixelX_pi),
-        .pixelY(pixelY_pi)
+        .pixelY(pixelY_pi),
+
+        .frame_start_flag(frame_start_flag_pi)
     );
 
     // -----------------------------------------------------------
     // AIV video input signals
     wire [17:0] rgb_aiv_666;
+
+    wire frame_start_flag_pi;
 
     aivvideo aivvideo0 (
         // Inputs
@@ -107,9 +111,8 @@ module top(
         .rgb_111(rgb_aiv_111),
         .csync(aiv_csync),
 
-        .pixelX_pi(pixelX_pi),
-        .pixelY_pi(pixelY_pi),
         .displayEnable_pi(displayEnable_pi),
+        .frame_start_flag_pi(frame_start_flag_pi),
 
         // SRAM interface
         .SRAM0_A(SRAM0_A),

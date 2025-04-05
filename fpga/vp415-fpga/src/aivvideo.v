@@ -36,9 +36,8 @@ module aivvideo (
     input [2:0] rgb_111,
     input csync,
 
-    input [9:0] pixelX_pi,
-    input [9:0] pixelY_pi,
-    input displayEnable_pi,
+    input displayEnable_pi, // Active high when in the active display area
+    input frame_start_flag_pi, // Start of frame flag
 
     // SRAM interface
     output [17:0] SRAM0_A,
@@ -127,10 +126,7 @@ module aivvideo (
 
     // Start of frame flags
     wire startOfFrame_in;
-    wire startOfFrame_out;
-
     assign startOfFrame_in = (pixelX_aiv == 10'd0 && pixelY_aiv == 10'd0 && displayEnable_aiv == 1'b1) ? 1'b1 : 1'b0;
-    assign startOfFrame_out = (pixelX_pi == 10'd0 && pixelY_pi == 10'd0 && displayEnable_pi == 1'b1) ? 1'b1 : 1'b0;
 
     framebuffer framebuffer0 (
         // Inputs
@@ -142,7 +138,7 @@ module aivvideo (
         .display_en_out(displayEnable_pi),
 
         .frame_start_flag_in(startOfFrame_in),
-        .frame_start_flag_out(startOfFrame_out),
+        .frame_start_flag_out(frame_start_flag_pi),
 
         //.rgb_111_in(rgb_sync_111),
         .rgb_111_in(rgb_testcard_111),
