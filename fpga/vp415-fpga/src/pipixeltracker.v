@@ -39,7 +39,8 @@ module pi_tracker (
 
     output [9:0] fieldLineDot_pi,
     output [9:0] frameLine_pi,
-    output isFieldOdd_pi
+    output isFieldOdd_pi,
+    output frame_start_flag
 );
 
     // Odd/Even Field tracker
@@ -82,6 +83,27 @@ module pi_tracker (
         
         .frameLine(frameLine_pi)
     );
+
+    // Generate the frame start flag
+    reg frame_start_flag_r;
+    assign frame_start_flag = frame_start_flag_r;
+
+    always @(posedge pixelClockX6, negedge nReset) begin
+        if (!nReset) begin
+            // Reset
+            frame_start_flag_r <= 0;
+        end
+        else begin
+            if (frameLine_pi == 0 && fieldLineDot_pi == 0) begin
+                // Start of frame
+                frame_start_flag_r <= 1;
+            end
+            else begin
+                // Not start of frame
+                frame_start_flag_r <= 0;
+            end
+        end
+    end
 
 endmodule
 

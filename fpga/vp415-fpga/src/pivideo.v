@@ -40,7 +40,9 @@ module pivideo (
     output csync,
 
     output [9:0] pixelX,
-    output [9:0] pixelY
+    output [9:0] pixelY,
+
+    output frame_start_flag
 );
 
     // -----------------------------------------------------------
@@ -75,7 +77,8 @@ module pivideo (
         // Outputs
         .fieldLineDot_pi(pixelX),
         .frameLine_pi(pixelY),
-        .isFieldOdd_pi(isFieldOdd_pi)
+        .isFieldOdd_pi(isFieldOdd_pi),
+        .frame_start_flag(frame_start_flag)
     );
 
     // -----------------------------------------------------------
