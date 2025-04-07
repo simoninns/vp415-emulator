@@ -61,7 +61,6 @@ module aivvideo (
     sync_signals sync_signals0 (
         // Inputs (asynchronous)
         .clk(sysClk),
-        .clkPhase(sysClkPhase),
         .rgb_111(rgb_111),
         .csync(csync),
 
