@@ -87,13 +87,8 @@ module framebuffer(
     reg [17:0] output_framebuffer_addr;
     reg [2:0] output_pixel_counter;
 
-    reg [15:0] test_buffer;
-
     reg [2:0] rgb_111_out_r;
     assign rgb_111_out = rgb_111_out_r;
-
-    // Test only
-    localparam ADDR_PER_LINE = 720 / 5; // Number of addresses per line (720 pixels / 5 pixels per address)
 
     // Input processing
     always @(posedge clk or negedge reset_n) begin
@@ -223,11 +218,9 @@ module framebuffer(
                         if (output_buffer_current) begin
                             // Use output buffer 1
                             output_buffer1 <= sram_data_in;
-                            //output_buffer1 <= test_buffer; // Use test pattern for debugging
                         end else begin
                             // Use output buffer 0
                             output_buffer0 <= sram_data_in;
-                            //output_buffer0 <= test_buffer; // Use test pattern for debugging
                         end
 
                         // Increment the output framebuffer address

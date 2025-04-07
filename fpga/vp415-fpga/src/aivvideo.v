@@ -61,6 +61,7 @@ module aivvideo (
     sync_signals sync_signals0 (
         // Inputs (asynchronous)
         .clk(sysClk),
+        .clkPhase(sysClkPhase),
         .rgb_111(rgb_111),
         .csync(csync),
 
@@ -108,7 +109,6 @@ module aivvideo (
         .active_frame_line(pixelY_aiv),
         .display_enable(displayEnable_aiv),
         .frame_start_flag(frame_start_flag_aiv),
-        .debug(debug)
     );
 
     // -----------------------------------------------------------
@@ -143,8 +143,8 @@ module aivvideo (
         .frame_start_flag_in(frame_start_flag_aiv),
         .frame_start_flag_out(frame_start_flag_pi),
 
-        //.rgb_111_in(rgb_sync_111),
-        .rgb_111_in(rgb_testcard_111),
+        .rgb_111_in(rgb_sync_111),
+        //.rgb_111_in(rgb_testcard_111),
         .rgb_111_out(rgb_fb_111),
         
         // SRAM interface signals

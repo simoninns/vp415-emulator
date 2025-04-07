@@ -44,7 +44,6 @@ module aiv_active_frame_tracker (
     output [9:0] active_frame_line, // active line number (0-576)
     output display_enable,          // display enable signal
     output frame_start_flag,        // frame start flag
-    output [15:0] debug           // debug output
 );
 
     // Track the active field lines
@@ -76,21 +75,15 @@ module aiv_active_frame_tracker (
     reg display_enable_r = 1'b0;
 
     // Generate the frame start flag
-    assign frame_start_flag = (active_field_line == 10'd0) & (active_field_dot == 10'd0) & (isActiveFieldLine & isActiveFieldDot) & isFieldOdd;
-
-    // Debug output
-    assign debug[0] = isFieldOdd;
-    assign debug[1] = frame_start_flag;
-    assign debug[2] = vsync;
-    assign debug[3] = hsync;
-    assign debug[4] = isActiveFieldLine & isActiveFieldDot;
-    assign debug[15:5] = 14'b0;
+    reg frame_start_flag_r = 1'b0;
+    assign frame_start_flag = frame_start_flag_r; // (active_field_line == 10'd0) & (active_field_dot == 10'd0) & (isActiveFieldLine & isActiveFieldDot) & isFieldOdd;
 
     always @(posedge clk, negedge nReset) begin
         if (!nReset) begin
             active_frame_line_r <= 10'b0;
             active_frame_dot_r <= 10'b0;
             display_enable_r <= 1'b0;
+            frame_start_flag_r <= 1'b0;
         end else begin
             // Are we in an active region?
             if (isActiveFieldLine & isActiveFieldDot) begin
@@ -108,6 +101,9 @@ module aiv_active_frame_tracker (
 
                     // Set the active frame dot (which is the same as the active field dot)
                     active_frame_dot_r <= active_field_dot;
+
+                    // Set the frame start flag if we are at the start of the frame
+                    frame_start_flag_r <= (active_field_line == 10'd0) & (active_field_dot == 10'd0) & (isActiveFieldLine & isActiveFieldDot) & isFieldOdd;
                 end
             end else begin
                 if (clkPhase == 3'b000) begin
@@ -115,6 +111,7 @@ module aiv_active_frame_tracker (
                     display_enable_r <= 1'b0;
                     active_frame_line_r <= 10'b0;
                     active_frame_dot_r <= 10'b0;
+                    frame_start_flag_r <= 1'b0;
                 end
             end
         end
