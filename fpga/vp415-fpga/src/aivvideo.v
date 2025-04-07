@@ -48,7 +48,6 @@ module aivvideo (
 
     output [17:0] rgb_666, // 18-bit RGB666 output
     output frame_start_flag_aiv,
-    output [15:0] debug,
 );
 
     // -----------------------------------------------------------

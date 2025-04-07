@@ -56,9 +56,7 @@ module top(
 
     // -----------------------------------------------------------
     // Picoscope debug output mapping
-    // assign picoScope[0] = frame_start_flag_pi;
-    // assign picoScope[1] = frame_start_flag_aiv;
-    // assign picoScope[15:2] = 16'b0;
+    assign picoScope[15:0] = 16'd0;
 
     // -----------------------------------------------------------
     // SCART output (ensures output is blanked when not in the active area)
@@ -128,7 +126,6 @@ module top(
         .rgb_666(rgb_aiv_666),
 
         .frame_start_flag_aiv(frame_start_flag_aiv),
-        .debug(picoScope)
     );
     
     // -----------------------------------------------------------
