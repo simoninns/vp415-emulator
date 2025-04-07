@@ -33,6 +33,7 @@
 // active line number (0-576) and the display enable signal.
 module aiv_active_frame_tracker (
     input wire clk,             // 81 MHz clock
+    input wire [2:0] clkPhase, // 3-bit phase control for the clock
     input wire nReset,          // active low reset
 
     input wire hsync,           // horizontal sync signal
@@ -93,23 +94,28 @@ module aiv_active_frame_tracker (
         end else begin
             // Are we in an active region?
             if (isActiveFieldLine & isActiveFieldDot) begin
-                // Set the display enable signal
-                display_enable_r <= 1'b1;
+                // Only update when clkPhase is 0
+                if (clkPhase == 3'b000) begin
+                    // Set the display enable signal
+                    display_enable_r <= 1'b1;
 
-                // Set the active frame line and dot based on the field odd signal
-                if (isFieldOdd) begin
-                    active_frame_line_r <= (active_field_line * 2) + 1;
-                end else begin
-                    active_frame_line_r <= (active_field_line * 2);
+                    // Set the active frame line and dot based on the field odd signal
+                    if (isFieldOdd) begin
+                        active_frame_line_r <= (active_field_line * 2) + 1;
+                    end else begin
+                        active_frame_line_r <= (active_field_line * 2);
+                    end
+
+                    // Set the active frame dot (which is the same as the active field dot)
+                    active_frame_dot_r <= active_field_dot;
                 end
-
-                // Set the active frame dot (which is the same as the active field dot)
-                active_frame_dot_r <= active_field_dot;
             end else begin
-                // Not in an active region, clear the display enable signal
-                display_enable_r <= 1'b0;
-                active_frame_line_r <= 10'b0;
-                active_frame_dot_r <= 10'b0;
+                if (clkPhase == 3'b000) begin
+                    // Not in an active region, clear the display enable signal
+                    display_enable_r <= 1'b0;
+                    active_frame_line_r <= 10'b0;
+                    active_frame_dot_r <= 10'b0;
+                end
             end
         end
     end

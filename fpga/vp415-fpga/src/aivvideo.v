@@ -78,6 +78,7 @@ module aivvideo (
     sync_regenerator_pal576i sync_regenerator_pal576i0 (
         // Inputs
         .clk(sysClk),
+        .clkPhase(sysClkPhase),
         .csync(aiv_csyncIn_sync),
 
         // Outputs
@@ -96,6 +97,7 @@ module aivvideo (
     aiv_active_frame_tracker aiv_active_frame_tracker0 (
         // Inputs
         .clk(sysClk),
+        .clkPhase(sysClkPhase),
         .nReset(nReset),
         .hsync(hsync_aiv),
         .vsync(vsync_aiv),
@@ -141,8 +143,8 @@ module aivvideo (
         .frame_start_flag_in(frame_start_flag_aiv),
         .frame_start_flag_out(frame_start_flag_pi),
 
-        .rgb_111_in(rgb_sync_111),
-        //.rgb_111_in(rgb_testcard_111),
+        //.rgb_111_in(rgb_sync_111),
+        .rgb_111_in(rgb_testcard_111),
         .rgb_111_out(rgb_fb_111),
         
         // SRAM interface signals

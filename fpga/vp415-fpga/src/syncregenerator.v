@@ -30,6 +30,7 @@
 
 module sync_regenerator_pal576i (
 	input wire clk,		// 81 MHz clock
+    input wire [2:0] clkPhase, // 3-bit phase control for the clock
 	input wire csync,	// composite sync input
 
 	output hsync,		// horizontal sync output
