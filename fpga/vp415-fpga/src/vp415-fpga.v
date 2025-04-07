@@ -56,7 +56,9 @@ module top(
 
     // -----------------------------------------------------------
     // Picoscope debug output mapping
-    assign picoScope[15:0] = 16'b0;
+    // assign picoScope[0] = frame_start_flag_pi;
+    // assign picoScope[1] = frame_start_flag_aiv;
+    // assign picoScope[15:2] = 16'b0;
 
     // -----------------------------------------------------------
     // SCART output (ensures output is blanked when not in the active area)
@@ -75,6 +77,8 @@ module top(
 
     wire [9:0] pixelX_pi; // Pi pixel X coordinate
     wire [9:0] pixelY_pi; // Pi pixel Y coordinate
+
+    wire frame_start_flag_pi;
 
     pivideo pivdeo0 (
         // Inputs
@@ -98,8 +102,7 @@ module top(
     // -----------------------------------------------------------
     // AIV video input signals
     wire [17:0] rgb_aiv_666;
-
-    wire frame_start_flag_pi;
+    wire frame_start_flag_aiv;
 
     aivvideo aivvideo0 (
         // Inputs
@@ -122,7 +125,10 @@ module top(
         .SRAM0_nWE(SRAM0_nWE),
 
         // RGB666 Output
-        .rgb_666(rgb_aiv_666)
+        .rgb_666(rgb_aiv_666),
+
+        .frame_start_flag_aiv(frame_start_flag_aiv),
+        .debug(picoScope)
     );
     
     // -----------------------------------------------------------

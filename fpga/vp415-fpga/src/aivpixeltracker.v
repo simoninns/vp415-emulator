@@ -41,11 +41,13 @@ module aiv_active_frame_tracker (
 
     output [9:0] active_frame_dot,  // active dot number (0-720)
     output [9:0] active_frame_line, // active line number (0-576)
-    output display_enable           // display enable signal
+    output display_enable,          // display enable signal
+    output frame_start_flag,        // frame start flag
+    output [15:0] debug           // debug output
 );
 
     // Track the active field lines
-    wire [8:0] active_field_line;
+    wire [9:0] active_field_line;
     wire isActiveFieldLine;
     aiv_active_line_tracker line_tracker (
         .clk(clk),
@@ -68,9 +70,20 @@ module aiv_active_frame_tracker (
     );
 
     // Generate the active frame line based on the field line and field odd signal
-    reg [9:0] active_frame_line_r = 9'b0; // 0-511
+    reg [9:0] active_frame_line_r = 10'b0; // 0-511
     reg [9:0] active_frame_dot_r = 10'b0; // 0-719
     reg display_enable_r = 1'b0;
+
+    // Generate the frame start flag
+    assign frame_start_flag = (active_field_line == 10'd0) & (active_field_dot == 10'd0) & (isActiveFieldLine & isActiveFieldDot) & isFieldOdd;
+
+    // Debug output
+    assign debug[0] = isFieldOdd;
+    assign debug[1] = frame_start_flag;
+    assign debug[2] = vsync;
+    assign debug[3] = hsync;
+    assign debug[4] = isActiveFieldLine & isActiveFieldDot;
+    assign debug[15:5] = 14'b0;
 
     always @(posedge clk, negedge nReset) begin
         if (!nReset) begin
@@ -79,7 +92,7 @@ module aiv_active_frame_tracker (
             display_enable_r <= 1'b0;
         end else begin
             // Are we in an active region?
-            if (isActiveFieldLine && isActiveFieldDot) begin
+            if (isActiveFieldLine & isActiveFieldDot) begin
                 // Set the display enable signal
                 display_enable_r <= 1'b1;
 
@@ -189,28 +202,28 @@ module aiv_active_line_tracker (
     input wire vsync,           // vertical sync signal
     input wire hsync,           // horizontal sync signal
 
-    output [8:0] active_line,   // active line number (0-287)
+    output [9:0] active_line,   // active line number (0-287)
     output isActive             // line is active flag
 );
 
     // Constants for active region
-    localparam ACTIVE_V_START = 9'd23;  // Start of active vertical region
-    localparam ACTIVE_V_END = ACTIVE_V_START + 9'd288;   // End of active vertical region
+    localparam ACTIVE_V_START = 10'd23;  // Start of active vertical region
+    localparam ACTIVE_V_END = ACTIVE_V_START + 10'd288;   // End of active vertical region
 
     // Registers for tracking lines
-    reg [8:0] line_r;        // current line in field (0-311)
-    reg [8:0] active_line_r; // active line (0-287)
+    reg [9:0] line_r;        // current line in field (0-311)
+    reg [9:0] active_line_r; // active line (0-287)
     reg isActive_r;          // display enable signal
 
     always @(posedge clk, negedge nReset) begin
         if (!nReset) begin
-            line_r <= 9'b0;
-            active_line_r <= 9'b0;
+            line_r <= 10'b0;
+            active_line_r <= 10'b0;
             isActive_r <= 1'b0;
         end else begin
             // Reset line counter if vsync is asserted
             if (vsync) begin
-                line_r <= 9'b0;
+                line_r <= 10'b0;
             end
 
             // Increment the line counter on hsync
@@ -226,7 +239,7 @@ module aiv_active_line_tracker (
                 isActive_r <= 1'b1;
             end else begin
                 // Not an active line
-                active_line_r <= 9'b0;
+                active_line_r <= 10'b0;
                 isActive_r <= 1'b0;
             end
         end

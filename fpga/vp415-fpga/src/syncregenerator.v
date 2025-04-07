@@ -215,8 +215,7 @@ module detect_field_type_pal (
 
         // Sample counter on vsync pulse
         if (vsync_pulse) begin
-            field_is_odd <= ~(counter <= THRESHOLD_20US);
-            //field_is_odd <= (counter <= THRESHOLD_20US);
+            field_is_odd <= (counter <= THRESHOLD_20US);
         end
     end
 
