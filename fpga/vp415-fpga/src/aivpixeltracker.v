@@ -52,6 +52,7 @@ module aiv_active_frame_tracker (
     aiv_active_line_tracker line_tracker (
         .clk(clk),
         .nReset(nReset),
+        .clkPhase(clkPhase),
         .vsync(vsync),
         .hsync(hsync),
         .active_line(active_field_line),
@@ -64,6 +65,7 @@ module aiv_active_frame_tracker (
     aiv_active_dot_tracker dot_tracker (
         .clk(clk),
         .nReset(nReset),
+        .clkPhase(clkPhase),
         .hsync(hsync),
         .active_dot(active_field_dot),
         .isActive(isActiveFieldDot)
@@ -133,6 +135,7 @@ endmodule
 module aiv_active_dot_tracker (
     input wire clk,             // 81 MHz clock
     input wire nReset,          // active low reset
+    input wire [2:0] clkPhase, // 3-bit phase control for the clock
 
     input wire hsync,           // horizontal sync signal
 
@@ -155,27 +158,19 @@ module aiv_active_dot_tracker (
     reg [9:0] active_dot_r; // active dot (0-719)
     reg isActive_r;         // display enable signal
 
-    // Clock divider for 13.5MHz dot clock (81MHz/6)
-    reg [2:0] clk_div = 3'b0;
-
     always @(posedge clk, negedge nReset) begin
         if (!nReset) begin
             dot_r <= 10'b0;
             active_dot_r <= 10'b0;
             isActive_r <= 1'b0;
-            clk_div <= 3'b0;
         end else begin
             // Reset dot counter if hsync is asserted
             if (hsync) begin
                 dot_r <= 10'b0;
             end else begin
-                // Increment the clock divider (dot clock is clk/6)
-                clk_div <= clk_div + 1;
-
-                // If we have a full clock cycle (divide by 6), update the dot counter
-                if (clk_div == 3'b101) begin
+                // Update the dot counter
+                if (clkPhase == 3'b000) begin
                     dot_r <= dot_r + 1;
-                    clk_div <= 3'b0; // Reset the clock divider
                 end
             end
 
@@ -201,6 +196,7 @@ endmodule
 module aiv_active_line_tracker (
     input wire clk,             // 81 MHz clock
     input wire nReset,          // active low reset
+    input wire [2:0] clkPhase, // 3-bit phase control for the clock
 
     input wire vsync,           // vertical sync signal
     input wire hsync,           // horizontal sync signal
