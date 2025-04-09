@@ -1,0 +1,143 @@
+# VP415-Emulator FPGA PCF file
+# Based on the Olimex iCE40HX8K-EVB board
+
+## 100MHz System clock (unused at the moment)
+set_io -nowarn clock100Mhz J3
+
+## Buttons
+set_io -nowarn buttons[0] K11
+set_io -nowarn buttons[1] P13
+
+## LEDs
+set_io -nowarn leds[0] M12
+set_io -nowarn leds[1] R16
+
+## Samsung K6R4016V1D-TC10 512K SRAM (on-board)
+set_io -nowarn SRAM0_nCS T6
+set_io -nowarn SRAM0_nOE L9
+set_io -nowarn SRAM0_nWE T7
+set_io -nowarn SRAM0_A[0] N6
+set_io -nowarn SRAM0_A[1] T1
+set_io -nowarn SRAM0_A[2] P4
+set_io -nowarn SRAM0_A[3] R2
+set_io -nowarn SRAM0_A[4] N5
+set_io -nowarn SRAM0_A[5] T2
+set_io -nowarn SRAM0_A[6] P5
+set_io -nowarn SRAM0_A[7] R3
+set_io -nowarn SRAM0_A[8] R5
+set_io -nowarn SRAM0_A[9] T3
+set_io -nowarn SRAM0_A[10] R4
+set_io -nowarn SRAM0_A[11] M7
+set_io -nowarn SRAM0_A[12] N7
+set_io -nowarn SRAM0_A[13] P6
+set_io -nowarn SRAM0_A[14] M8
+set_io -nowarn SRAM0_A[15] T5
+set_io -nowarn SRAM0_A[16] R6
+set_io -nowarn SRAM0_A[17] P8
+set_io -nowarn SRAM0_D[0] T8
+set_io -nowarn SRAM0_D[1] P7
+set_io -nowarn SRAM0_D[2] N9
+set_io -nowarn SRAM0_D[3] T9
+set_io -nowarn SRAM0_D[4] M9
+set_io -nowarn SRAM0_D[5] R9
+set_io -nowarn SRAM0_D[6] K9
+set_io -nowarn SRAM0_D[7] P9
+set_io -nowarn SRAM0_D[8] R10
+set_io -nowarn SRAM0_D[9] L10
+set_io -nowarn SRAM0_D[10] P10
+set_io -nowarn SRAM0_D[11] N10
+set_io -nowarn SRAM0_D[12] T10
+set_io -nowarn SRAM0_D[13] T11
+set_io -nowarn SRAM0_D[14] T15
+set_io -nowarn SRAM0_D[15] T14
+
+## GPIO1 (34 pin right-angle IDC)
+## SCART RGB666
+set_io -nowarn rgb_scart_666[12] E4 # Red LSB
+set_io -nowarn rgb_scart_666[13] B2
+set_io -nowarn rgb_scart_666[14] F5
+set_io -nowarn rgb_scart_666[15] B1
+set_io -nowarn rgb_scart_666[16] C1
+set_io -nowarn rgb_scart_666[17] C2 # Red MSB
+
+set_io -nowarn rgb_scart_666[6] F4 # Green LSB
+set_io -nowarn rgb_scart_666[7] D2
+set_io -nowarn rgb_scart_666[8] G5
+set_io -nowarn rgb_scart_666[9] D1
+set_io -nowarn rgb_scart_666[10] G4
+set_io -nowarn rgb_scart_666[11] E3 # Green MSB
+
+set_io -nowarn rgb_scart_666[0] J2 # Blue LSB
+set_io -nowarn rgb_scart_666[1] H1
+set_io -nowarn rgb_scart_666[2] G1
+set_io -nowarn rgb_scart_666[3] J5
+set_io -nowarn rgb_scart_666[4] H2
+set_io -nowarn rgb_scart_666[5] J4 # Blue MSB
+
+set_io -nowarn csync_scart H5
+
+set_io -nowarn gpio1_22 G2
+set_io -nowarn gpio1_24 H4
+set_io -nowarn gpio1_26 F1
+set_io -nowarn gpio1_28 H6
+set_io -nowarn gpio1_30 F2
+set_io -nowarn gpio1_31 E2
+set_io -nowarn gpio1_32 H3
+set_io -nowarn gpio1_33 G3
+set_io -nowarn gpio1_34 F3
+
+## EXT2 Temp TTL RGB in
+set_io -nowarn rgb_aiv_111[2] B6 # Red
+set_io -nowarn rgb_aiv_111[1] C6 # Green
+set_io -nowarn rgb_aiv_111[0] D7 # Blue
+set_io -nowarn aiv_csync A6
+# set_io -nowarn aiv_vsyncIn D6
+# set_io -nowarn aiv_csyncIn A5
+
+## EXT3 40-pin header to Raspberry Pi GPIO header
+set_io -nowarn pi_gpio[2]  M15
+set_io -nowarn pi_gpio[3]  J11
+set_io -nowarn pi_gpio[4]  E14
+set_io -nowarn pi_gpio[14] L16
+set_io -nowarn pi_gpio[15] F11
+set_io -nowarn pi_gpio[17] K13
+set_io -nowarn pi_gpio[18] D15
+set_io -nowarn pi_gpio[27] K14
+set_io -nowarn pi_gpio[22] F12
+set_io -nowarn pi_gpio[23] J15
+set_io -nowarn pi_gpio[24] F14
+set_io -nowarn pi_gpio[10] K15
+set_io -nowarn pi_gpio[9]  G12
+set_io -nowarn pi_gpio[25] K16
+set_io -nowarn pi_gpio[11] D16
+set_io -nowarn pi_gpio[8]  J14
+set_io -nowarn pi_gpio[7]  G13
+set_io -nowarn pi_gpio[0]  J12
+set_io -nowarn pi_gpio[1]  E16
+set_io -nowarn pi_gpio[5]  J13
+set_io -nowarn pi_gpio[6]  G14
+set_io -nowarn pi_gpio[12] J16
+set_io -nowarn pi_gpio[13] F15
+set_io -nowarn pi_gpio[19] H13
+set_io -nowarn pi_gpio[16] G11
+set_io -nowarn pi_gpio[26] H11
+set_io -nowarn pi_gpio[20] F16
+set_io -nowarn pi_gpio[21] H16
+
+## EXT4 - PicoScope 16-bit Data analysis connector
+set_io -nowarn picoScope[0] N4
+set_io -nowarn picoScope[1] M5
+set_io -nowarn picoScope[2] P2
+set_io -nowarn picoScope[3] P1
+set_io -nowarn picoScope[4] N3
+set_io -nowarn picoScope[5] R1
+set_io -nowarn picoScope[6] M4
+set_io -nowarn picoScope[7] L5
+set_io -nowarn picoScope[8] M3
+set_io -nowarn picoScope[9] N2
+set_io -nowarn picoScope[10] L7
+set_io -nowarn picoScope[11] K5
+set_io -nowarn picoScope[12] L3
+set_io -nowarn picoScope[13] M6
+set_io -nowarn picoScope[14] M2
+set_io -nowarn picoScope[15] L6
