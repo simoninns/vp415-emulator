@@ -1,7 +1,7 @@
 /************************************************************************
 	
-	statusleds.v
-	Status LEDs control
+	pal_framestart.v
+	Start of frame flag
 	
 	VP415-Emulator FPGA
 	Copyright (C) 2025 Simon Inns
@@ -28,37 +28,24 @@
 // Disable Verilog implicit definitions
 `default_nettype none
 
-// Flash two LEDs on and off to show the FPGA is running
-module statusleds(
-    input nReset,
-    input sysClock,
+module pal_framestart(
+	input clk,
+    input [9:0] pixel_x,
+    input [9:0] pixel_y,
+    input pixel_ce,
 
-    output [1:0] leds
+    output frame_start
 );
 
-    // Delay counter for PWM
-    reg [25:0] cnt;
-    always @(posedge sysClock, negedge nReset) begin
-        if (!nReset) begin
-            cnt <= 26'b0000000000000000000000000;
+    reg start_of_frame_r;
+    assign frame_start = start_of_frame_r;
+
+    always @(posedge clk) begin
+        if (pixel_x == 10'b0 && pixel_y == 10'b0 && pixel_ce) begin
+            start_of_frame_r <= 1'b1;
         end else begin
-            cnt <= cnt+1;
+            start_of_frame_r <= 1'b0;
         end
     end
-
-    // Ramp up and down the intensity
-    reg [4:0] pwm;
-    wire [3:0] intensity = cnt[25] ? cnt[24:21] : ~cnt[24:21];
-    always @(posedge sysClock, negedge nReset) begin
-        if (!nReset) begin
-            pwm <= 5'b00000;
-        end else begin
-            pwm <= pwm[3:0] + intensity;
-        end
-    end
-
-    // Drive the LEDs
-    assign leds[0] = pwm[4];
-    assign leds[1] = 5'b11111 - pwm[4];
 
 endmodule

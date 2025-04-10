@@ -11,8 +11,16 @@ set(TARGET_NAME aivin)
 set(VERILOG_SRC_DIR ${CMAKE_CURRENT_SOURCE_DIR}/src)
 set(SRC_MODULES
     ${VERILOG_SRC_DIR}/${TARGET_NAME}.v
-    ${VERILOG_SRC_DIR}/nreset.v
-    ${VERILOG_SRC_DIR}/statusleds.v
+    ${VERILOG_SRC_DIR}/status_leds.v
+    ${VERILOG_SRC_DIR}/pi_pixel_clock_pll.v
+    ${VERILOG_SRC_DIR}/pi_pixel_tracker.v
+    ${VERILOG_SRC_DIR}/aiv_input_sync.v
+    ${VERILOG_SRC_DIR}/aiv_sync_separator.v
+    ${VERILOG_SRC_DIR}/aiv_pixel_tracker.v
+    ${VERILOG_SRC_DIR}/aiv_framebuffer.v
+    ${VERILOG_SRC_DIR}/aiv_to_rgb666.v
+    ${VERILOG_SRC_DIR}/pal_testcard.v
+    ${VERILOG_SRC_DIR}/pal_framestart.v
 )
 
 # Target JSON file

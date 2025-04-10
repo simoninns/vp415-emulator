@@ -1,8 +1,8 @@
 /************************************************************************
-	
-	nreset.v
-	Reset signal generation
-	
+    
+    aiv_to_rgb666.v
+    Convert RGB111 to RGB666
+    
 	VP415-Emulator FPGA
 	Copyright (C) 2025 Simon Inns
 	
@@ -28,29 +28,30 @@
 // Disable Verilog implicit definitions
 `default_nettype none
 
-// This module implements a simple Larson Scanner to show when the
-// FPGA board is programmed and running.
+module aiv_to_rgb666 (
+    input wire clk,          // 81 MHz clock
+    input wire [2:0] rgb_111,
 
-module nreset(
-    input sysClock,
-    output nReset
+    output reg [17:0] rgb_666
 );
 
-    reg [7:0] resetTimer = 8'b0; 
-    reg nReset_r = 1'b0;
-
-    always @(posedge sysClock) begin
-        // Generate nReset signal for 250 sysClock cycles
-        if (resetTimer < 250) begin
-            // We are in reset
-            nReset_r <= 1'b1;
-            resetTimer <= resetTimer + 1'b1;
+    // Convert RGB111 to RGB666
+    always @(posedge clk) begin
+        if (rgb_111[2]) begin
+            rgb_666[17:12] <= 6'b111111;
         end else begin
-            // We are not in reset
-            nReset_r <= 1'b1;
+            rgb_666[17:12] <= 6'b000000;
+        end
+        if (rgb_111[1]) begin
+            rgb_666[11:6] <= 6'b111111;
+        end else begin
+            rgb_666[11:6] <= 6'b000000;
+        end
+        if (rgb_111[0]) begin
+            rgb_666[5:0] <= 6'b111111;
+        end else begin
+            rgb_666[5:0] <= 6'b000000;
         end
     end
-
-    assign nReset = nReset_r;
 
 endmodule
